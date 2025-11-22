@@ -3,11 +3,10 @@ description: Deep context gatherer (Librarian).
 mode: subagent
 model: openai/gpt-5.1
 tools:
-  write: true
-  edit: true
+  write: false
+  edit: false
   bash: true
 permission:
-  edit: allow
   bash:
     "ls*": allow
     "cat*": allow

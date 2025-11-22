@@ -3,11 +3,11 @@ description: Planning subagent (Planner). Read-only.
 mode: subagent
 model: openai/gpt-5.1
 tools:
-  write: true
-  edit: true
+  write: false
+  edit: false
   bash: false
 permission:
-  edit: allow
+  edit: deny
   bash: deny
 ---
 
