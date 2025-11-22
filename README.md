@@ -72,10 +72,10 @@ Run this command in the root of your project:
 
 ```bash
 # Local install (current directory)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/lleewwiiss/opencode-agentic-workflow/main/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/lleewwiiss/opencode-maestro/main/install.sh)"
 
 # Global install (for all projects)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/lleewwiiss/opencode-agentic-workflow/main/install.sh)" -- -g
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/lleewwiiss/opencode-maestro/main/install.sh)" -- -g
 ```
 
 ## What it installs

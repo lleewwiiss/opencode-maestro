@@ -4,7 +4,7 @@ set -e
 
 # Configuration
 GITHUB_USER="lleewwiiss" # Change this to your username if forking
-GITHUB_REPO="opencode-agentic-workflow"
+GITHUB_REPO="opencode-maestro"
 BRANCH="main"
 
 # Parse Arguments
