@@ -29,7 +29,7 @@ Verify Beads status, initialize if missing, and ensure AGENTS.md describes the p
      ```md
      ## Beads (bd) Issue Tracking
      - Use `bd` for all task tracking (no ad-hoc TODOs).
-     - `bd ready --json` / `bd next` to pick work.
+     - `bd ready --json` to pick work.
      - `bd create ... --json` to file tasks (`--deps discovered-from:<parent>` for lineage).
      - `bd update <id> --status … --json` to track progress.
      - `bd sync` before ending a session.
