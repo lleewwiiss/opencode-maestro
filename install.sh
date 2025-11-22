@@ -79,7 +79,7 @@ install_file ".opencode/agent/researcher.md" "$TARGET_DIR/agent/researcher.md"
 install_file ".opencode/agent/architect.md" "$TARGET_DIR/agent/architect.md"
 
 # Install Commands
-COMMANDS="research.md plan.md implement.md bd-create.md bd-next.md land-plane.md"
+COMMANDS="research.md plan.md implement.md bd-create.md bd-next.md land-plane.md bd-onboard.md bead-notes.md branchlet-from-bead.md context.md kb-build.md review.md spec.md split.md architect.md"
 for cmd in $COMMANDS; do
     install_file ".opencode/command/$cmd" "$TARGET_DIR/command/$cmd"
 done

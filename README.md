@@ -1,6 +1,8 @@
+# OpenCode Agentic Workflow
+
 ```
-  __  __                 _
- |  \/  |               | |
+  __  __                       _
+ |  \/  |                     | |
  | \  / | __ _  ___  ___| |_ _ __ ___
  | |\/| |/ _` |/ _ \/ __| __| '__/ _ \
  | |  | | (_| |  __/\__ \ |_| | | (_) |
@@ -10,29 +12,59 @@
 
 A structured, high-context workflow for [OpenCode](https://opencode.ai), ported from [Amp Maestro](https://github.com/lleewwiiss/amp-maestro).
 
-It leverages OpenCode's **Agents**, **Commands**, and **Subtasks** to implement a rigorous **Research → Plan → Implement** loop, powered by **Beads** (Issue Tracking) and **Branchlet** (Worktrees).
+It utilizes **Beads** (Issue Tracking) and **Branchlet** (Worktrees) to manage agent context and isolation.
 
-## Features
+## Philosophy
 
-- **Primary Agent**:
-  - **Architect** (`openai/gpt-5.1`): The Manager. Orchestrates the workflow and manages context.
-- **Subagents**:
-  - **Planner** (`openai/gpt-5.1`): "Thinking" subagent for architectural planning.
-  - **Coder** (`google/gemini-3-pro-preview`): "Coding" subagent for implementation.
-  - **Researcher** (`openai/gpt-5.1`): "Librarian" subagent for context gathering.
-- **Slash Commands**:
-  - `/research`: Spawns **Researcher** subtask.
-  - `/plan`: Spawns **Planner** subtask.
-  - `/implement`: Spawns **Coder** subtask.
-  - `/bd-create` / `/bd-next`: Manage worktrees via Architect.
-- **Context Hygiene**: Uses OpenCode's **subtasks** (Child Sessions) to keep the Architect's context clean.
+This workflow implements the **"Frequent Intentional Compaction"** methodology championed by HumanLayer.
 
-## Prerequisites
+```mermaid
+graph TD
+    %% Styling for Dark Mode / High Contrast
+    classDef default fill:#1e1e1e,stroke:#333,stroke-width:2px,color:#fff;
+    classDef bead fill:#d97706,stroke:#b45309,stroke-width:2px,color:#fff; %% Orange/Brown
+    classDef git fill:#2563eb,stroke:#1d4ed8,stroke-width:2px,color:#fff; %% Blue
+    classDef amp fill:#7c3aed,stroke:#6d28d9,stroke-width:2px,color:#fff; %% Purple
 
-- [OpenCode](https://opencode.ai)
-- [Beads (bd)](https://github.com/beads-dev/beads)
-- [Branchlet](https://github.com/raghavpillai/branchlet)
-- `git`, `rg` (ripgrep)
+    New([User Input]) --> Create
+    
+    subgraph "1. Track (Beads)"
+        Create["/bd-create"]:::bead
+    end
+
+    subgraph "2. Isolate (Git)"
+        Worktree["/branchlet"]:::git
+    end
+
+    subgraph "3. Agent Loop"
+        Research["/research"]:::amp
+        Research --> Plan["/plan"]:::amp
+        Plan --> Implement["/implement"]:::amp
+    end
+    
+    subgraph "4. Ship"
+        Land["/land-plane"]:::git
+    end
+
+    Create --> Worktree
+    Worktree --> Research
+    Implement --> Land
+```
+
+It enforces a structured process:
+
+1. **Research**: Understand the problem deeply before touching code.
+2. **Plan**: Create a detailed, architectural plan (with Oracle reasoning).
+3. **Manager/Worker**: The main agent acts as a manager, spawning sub-agents for implementation to keep context clean.
+4. **Compaction**: Regularly summarizing work into durable artifacts (`research.md`, `plan.md`) to prevent context window pollution.
+5. **Artifacts over Memory**: Using the filesystem (`.beads/artifacts/`) as long-term memory, linked to Issues (`bd`).
+
+## The Stack
+
+- **[OpenCode](https://opencode.ai)**: The AI Coding Agent.
+- **[Beads (bd)](https://github.com/beads-dev/beads)**: Lightweight, CLI-first issue tracking that lives in git.
+- **[Branchlet](https://github.com/raghavpillai/branchlet)**: Git worktree manager for isolated agent environments.
+- **[HumanLayer](https://github.com/humanlayer/humanlayer)**: Creators of the "Context Engineering" and "12-Factor Agent" methodologies this workflow is based on.
 
 ## Installation
 
@@ -46,18 +78,31 @@ Run this command in the root of your project:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/lleewwiiss/opencode-agentic-workflow/main/install.sh)" -- -g
 ```
 
-## Workflow
+## What it installs
 
-1. **Pick Work**: `/bd-create "My new feature"` or `/bd-next`.
-2. **Research**: `/research` (Uses GPT-5.1 to analyze context).
-3. **Plan**: `/plan` (Uses GPT-5.1 to create a step-by-step plan).
-4. **Implement**: `/implement` (Uses Gemini 3.0 to write code).
-5. **Ship**: `/land-plane` (Runs tests and merges).
+1. **Slash Commands** (`.opencode/command/`):
+   - `/architect`: Visualize and document system architecture (ADRs, Diagrams).
+   - `/bd-create`: Interview-first issue creation.
+   - `/bd-next`: Pick tasks and auto-spawn worktrees.
+   - `/bd-onboard`: Onboard existing issues into the workflow.
+   - `/bead-notes`: Manage notes for a specific bead.
+   - `/branchlet-from-bead`: Create a worktree from an existing bead.
+   - `/context`: Load full bead context (artifacts, session notes).
+   - `/kb-build`: Build/update shared repository knowledge.
+   - `/research`: Deep context gathering (Librarian/Subagent).
+   - `/plan`: Oracle-powered implementation planning.
+   - `/implement`: Manager/Worker implementation loop.
+   - `/review`: Verify implementation against plan.
+   - `/spec`: Create detailed specifications before research.
+   - `/split`: Break down large tasks into smaller subtasks.
+   - `/land-plane`: Final pre-merge checklist.
 
-## Structure
+2. **Protocols**:
+   - `AGENTIC_WORKFLOW.md`: The master protocol document.
 
-This repository provides:
+## Usage
 
-- `.opencode/agent/`: Definitions for `plan` and `build` agents.
-- `.opencode/command/`: Custom slash commands that orchestrate the workflow and call the CLI tools.
-- `opencode.jsonc`: Recommended base configuration.
+1. **Start**: `opencode`
+2. **Pick Work**: `/bd-next` (or `/bd-create` for new ideas).
+3. **Deep Work**: The agent will guide you through `/research` -> `/plan` -> `/implement`.
+    - **Important**: Start a new OpenCode session after each command to ensure clean context if necessary, though subtasks handle most of this.
