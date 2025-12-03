@@ -73,13 +73,13 @@ install_file() {
 }
 
 # Install Agents
-install_file ".opencode/agent/planner.md" "$TARGET_DIR/agent/planner.md"
-install_file ".opencode/agent/coder.md" "$TARGET_DIR/agent/coder.md"
-install_file ".opencode/agent/researcher.md" "$TARGET_DIR/agent/researcher.md"
-install_file ".opencode/agent/architect.md" "$TARGET_DIR/agent/architect.md"
+install_file ".opencode/agent/codebase-analyzer.md" "$TARGET_DIR/agent/codebase-analyzer.md"
+install_file ".opencode/agent/codebase-locator.md" "$TARGET_DIR/agent/codebase-locator.md"
+install_file ".opencode/agent/codebase-pattern-finder.md" "$TARGET_DIR/agent/codebase-pattern-finder.md"
+install_file ".opencode/agent/web-search-researcher.md" "$TARGET_DIR/agent/web-search-researcher.md"
 
 # Install Commands
-COMMANDS="research.md plan.md implement.md bd-create.md bd-next.md land-plane.md bd-onboard.md bead-notes.md branchlet-from-bead.md context.md kb-build.md review.md spec.md split.md architect.md"
+COMMANDS="create.md start.md research.md plan.md iterate.md implement.md finish.md handoff.md resume.md"
 for cmd in $COMMANDS; do
     install_file ".opencode/command/$cmd" "$TARGET_DIR/command/$cmd"
 done
@@ -101,4 +101,4 @@ else
 fi
 
 echo "✅ Installation Complete!"
-echo "👉 Run 'opencode' and type '/bd-create' to get started."
+echo "👉 Run 'opencode' and type '/create' to get started."
