@@ -4,7 +4,7 @@ Aligned with:
 - [ACE-FCA](https://github.com/humanlayer/advanced-context-engineering-for-coding-agents) - Frequent Intentional Compaction
 - [Claude 4 Best Practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-4-best-practices) - Explicit instructions, parallel tools, investigate before acting
 
-**Tools**: Beads (bd CLI) + Branchlet (worktrees) + OpenCode (commands + subagents)
+**Tools**: Beads (bd CLI) + Git Worktrees + OpenCode (commands + subagents)
 
 ---
 

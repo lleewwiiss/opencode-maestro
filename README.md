@@ -12,7 +12,7 @@
 
 A structured, high-context workflow for [OpenCode](https://opencode.ai), aligned with [ACE-FCA](https://github.com/humanlayer/advanced-context-engineering-for-coding-agents) (Advanced Context Engineering - Frequent Intentional Compaction) and [Claude 4 Best Practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-4-best-practices).
 
-It utilizes **Beads** (Issue Tracking) and **Branchlet** (Worktrees) to manage agent context and isolation.
+It utilizes **Beads** (Issue Tracking) and **Git Worktrees** to manage agent context and isolation.
 
 ## Philosophy
 
@@ -114,7 +114,6 @@ A bead **CANNOT** be marked complete until:
 
 - **[OpenCode](https://opencode.ai)**: The AI Coding Agent
 - **[Beads (bd)](https://github.com/beads-dev/beads)**: Lightweight, CLI-first issue tracking that lives in git
-- **[Branchlet](https://github.com/raghavpillai/branchlet)**: Git worktree manager for isolated agent environments
 - **[HumanLayer](https://github.com/humanlayer/humanlayer)**: Creators of the "Context Engineering" and "12-Factor Agent" methodologies
 
 ## Installation

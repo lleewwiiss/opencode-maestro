@@ -35,17 +35,6 @@ if ! command -v bd &> /dev/null; then
     echo "   Please install it: https://github.com/beads-dev/beads"
 fi
 
-if ! command -v branchlet &> /dev/null; then
-    echo "📦 Installing Branchlet..."
-    if command -v npm &> /dev/null; then
-        npm install -g branchlet
-    else
-        echo "❌ npm not found. Please install node/npm to use Branchlet."
-    fi
-else
-    echo "✅ Branchlet already installed."
-fi
-
 # 2. Setup Directories
 echo "📂 Setting up directories..."
 mkdir -p "$TARGET_DIR/agent"

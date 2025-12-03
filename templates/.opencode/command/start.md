@@ -80,7 +80,7 @@ Options:
 
 <check_flags>
 Check $ARGUMENTS for flags:
-- `--worktree` → Use branchlet (isolated filesystem)
+- `--worktree` → Use git worktree (isolated filesystem)
 - `--branch` → Use feature branch (same filesystem)
 - Neither → Ask user to choose
 </check_flags>
@@ -103,8 +103,8 @@ Working tree has uncommitted changes.
 <setup>
 **For worktree:**
 ```bash
-branchlet create $BEAD_ID
-cd $(branchlet path $BEAD_ID)
+git worktree add ../$BEAD_ID -b $BEAD_ID
+cd ../$BEAD_ID
 ```
 
 **For branch:**
