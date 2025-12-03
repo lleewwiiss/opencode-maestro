@@ -20,6 +20,15 @@ Create a thorough but CONCISE document - capture essential state without bloat.
 Create a handoff document that allows a fresh session to continue work seamlessly.
 </goal>
 
+<principles>
+- **DRY for knowledge**: Don't lose learnings. Capture discoveries so the next session doesn't re-discover them.
+- **Use the power of text**: Plain text is universal, version-controllable, and survives tool changes.
+- **Strategic thinking**: Capture not just what was done, but the reasoning. Context enables better future decisions.
+- **Comments describe things not obvious from code**: The handoff captures what ISN'T in the code - context, decisions, gotchas.
+- **Frequent Intentional Compaction**: Compress context into artifacts before it's lost to context limits.
+- **Artifacts over Memory**: The handoff document becomes memory. Fresh sessions bootstrap from it.
+</principles>
+
 <bead_id>$1</bead_id>
 
 <workflow>

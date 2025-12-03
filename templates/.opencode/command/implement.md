@@ -31,6 +31,17 @@ Implement changes rather than suggesting them. The plan is approved - execute it
 Execute the plan phase by phase, making small reviewable changes, running tests after each step, and keeping plan.md updated with progress.
 </goal>
 
+<principles>
+- **ETC (Easy To Change)**: Design for flexibility. Prefer composition over inheritance, minimize coupling between components.
+- **DRY (Don't Repeat Yourself)**: Every piece of knowledge should have a single, authoritative representation.
+- **Orthogonality**: Keep components independent. Changes to one shouldn't require changes to others.
+- **Deep modules**: Hide complexity behind simple interfaces. Complex implementation is fine; complex interfaces are costly.
+- **Code should be obvious**: A reader should understand what code does without much effort. If it needs a comment, consider rewriting.
+- **One task at a time**: Each function/block should do one thing. Extract unrelated subproblems into separate functions.
+- **Pack information into names**: Names should be specific and descriptive. Avoid generic names like `data`, `temp`, `result`.
+- **Test after each change**: Small verified steps compound into reliable implementations. Catch regressions immediately.
+</principles>
+
 <prerequisites>
 - `plan.md` must exist and have been approved by human
 - Workspace must be set up (via /start)

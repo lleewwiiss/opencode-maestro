@@ -23,6 +23,14 @@ A previous session created a handoff to preserve context. Your job is to:
 Resume work seamlessly from a handoff, as if no context switch occurred.
 </goal>
 
+<principles>
+- **Fail Fast**: Validate state immediately. If something's wrong, surface it before wasting effort.
+- **Don't Program by Coincidence**: Understand the current state, don't assume. Verify before acting.
+- **Define errors out of existence**: If state has drifted, handle it gracefully rather than failing mysteriously later.
+- **Artifacts over Memory**: The handoff document IS the memory. Trust it, but verify against current state.
+- **Session continuity**: The goal is seamless continuation. User shouldn't notice the context switch.
+</principles>
+
 <bead_id>$1</bead_id>
 
 <workflow>

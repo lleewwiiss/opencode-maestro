@@ -26,6 +26,16 @@ Every finding in research.md must include a file:line reference. Do not make cla
 Produce a thorough, accurate research.md that gives the planner everything needed to create a solid implementation plan.
 </goal>
 
+<principles>
+- **Don't Program by Coincidence**: Understand WHY code works, not just that it works. Document the reasoning.
+- **Orthogonality awareness**: Identify how components are coupled. Note where changes will ripple.
+- **Information hiding**: Note what each module hides and exposes. This reveals architectural boundaries.
+- **Different layer, different abstraction**: Understand the abstraction level of each component you research.
+- **Extract unrelated subproblems**: Identify distinct concerns that could be separated in the implementation.
+- **Ground all claims**: Every finding must have a file:line reference. Ungrounded claims lead to hallucinated plans.
+- **Artifacts over Memory**: Persist findings to research.md incrementally. The artifact survives; context doesn't.
+</principles>
+
 <bead_id>$1</bead_id>
 
 <workflow>

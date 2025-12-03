@@ -28,6 +28,18 @@ Plans should specify the minimum changes needed to solve the problem. Do not pla
 Produce a thorough plan.md that an implementer can follow step-by-step, with clear success criteria and no open questions.
 </goal>
 
+<principles>
+- **ETC (Easy To Change)**: Plan designs that are flexible. Ask "will this be easy to modify later?"
+- **Tracer Bullets**: Plan for working end-to-end first, then iterate. Get feedback early rather than building everything then integrating.
+- **Orthogonality**: Design components to be independent. Eliminate effects between unrelated things.
+- **Design it twice**: Consider at least two approaches before committing. The first idea is rarely the best.
+- **Strategic vs tactical**: Invest in good design now. Tactical "just make it work" accumulates complexity debt.
+- **Pull complexity downward**: It's better for implementation to be complex than for interfaces to be complex.
+- **Deep modules**: Simple interfaces hiding complex implementation. Shallow modules (complex interface, simple implementation) add complexity.
+- **Write less code**: The best code is no code. Question whether each component is necessary.
+- **High-leverage review point**: A bad plan leads to hundreds of bad lines of code. Invest time here.
+</principles>
+
 <prerequisites>
 - `research.md` must exist and have been reviewed by human
 - Bead must be in appropriate status

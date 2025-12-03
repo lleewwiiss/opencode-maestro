@@ -19,6 +19,16 @@ This is a high-leverage review point - catch issues before they reach the PR.
 Bring work to clean completion: validate against plan, commit atomically, sync beads, push, report next steps.
 </goal>
 
+<principles>
+- **Fix Broken Windows**: Don't leave bad code, poor designs, or tech debt unflagged. Note issues even if not fixing now.
+- **Good Enough Software**: Know when to stop. Perfect is the enemy of deployed. Ship when requirements are met.
+- **Code should be obvious**: During review, if code requires explanation, it may need rewriting not just commenting.
+- **Consistency**: Similar things should be done in similar ways. Flag inconsistencies with existing patterns.
+- **Surface-level improvements matter**: Naming, formatting, and organization significantly impact maintainability.
+- **High-leverage review point**: Catch issues before they reach PR. Deviations aren't bad but must be noted.
+- **Artifacts over Memory**: Document findings in review.md. The artifact persists; context doesn't.
+</principles>
+
 <bead_id>$1</bead_id>
 
 <workflow>
