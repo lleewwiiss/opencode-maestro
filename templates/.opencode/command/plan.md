@@ -296,8 +296,70 @@ npm run lint
 </document_structure>
 </phase>
 
+<phase name="child_beads">
+## Phase 5: Create Child Beads (Optional)
+
+<determine_if_needed>
+Check bead type:
+```bash
+bd show $1 --json
+```
+
+**For Epics**: Always offer to create child beads (work breakdown)
+**For Features**: Offer if plan has 3+ phases
+**For Bugs/Tasks**: Skip (usually atomic)
+</determine_if_needed>
+
+<offer_child_beads>
+If applicable, present option:
+
+```
+Plan has [N] phases. Create child beads for atomic tracking?
+
+Benefits of child beads:
+- Each phase is independently trackable (`bd list` shows progress)
+- Atomic commits per phase
+- Can /handoff and /resume per phase
+- Clear ownership if multiple sessions
+
+Child beads would be:
+  $1.1 - Phase 1: [name]
+  $1.2 - Phase 2: [name]
+  $1.3 - Phase 3: [name]
+
+Create child beads? (yes / no)
+- Yes (recommended for epics)
+- No (keep as single bead with plan.md tracking)
+```
+</offer_child_beads>
+
+<create_children>
+If user approves, create child beads:
+
+```bash
+# Create child beads with hierarchical IDs
+bd create "[Phase 1 name]" --type task --parent $1 --priority [same as parent] --description "Phase 1 of $1"
+bd create "[Phase 2 name]" --type task --parent $1 --priority [same as parent] --description "Phase 2 of $1"
+bd create "[Phase 3 name]" --type task --parent $1 --priority [same as parent] --description "Phase 3 of $1"
+```
+
+This creates: `$1.1`, `$1.2`, `$1.3` (hierarchical IDs)
+
+Update plan.md with child bead mapping:
+```markdown
+## Child Beads
+
+| Phase | Bead ID | Status |
+|-------|---------|--------|
+| Phase 1: [name] | $1.1 | open |
+| Phase 2: [name] | $1.2 | open |
+| Phase 3: [name] | $1.3 | open |
+```
+</create_children>
+</phase>
+
 <phase name="review_handoff">
-## Phase 5: Review and Handoff
+## Phase 6: Review and Handoff
 
 <handoff>
 After writing plan, present for review:
@@ -316,15 +378,25 @@ Phases
 2. [Phase 2 name] - [brief description]
 3. [Phase 3 name] - [brief description]
 
+Child Beads (if created)
+────────────────────────
+$1.1 - Phase 1: [name]
+$1.2 - Phase 2: [name]
+$1.3 - Phase 3: [name]
+
 Estimated Effort: [time]
 
 Artifact
 ────────
 .beads/artifacts/$1/plan.md
 
-Please review the plan. When approved, run:
+Please review the plan. When approved:
 
-  /implement $1
+  [If child beads exist]
+  /implement $1.1    # Start with Phase 1
+
+  [If no child beads]
+  /implement $1      # Execute all phases
 
 Or provide feedback to adjust the plan.
 ```

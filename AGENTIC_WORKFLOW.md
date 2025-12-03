@@ -32,16 +32,17 @@ Aligned with:
    [Review research.md]   ←  HIGH LEVERAGE
       ↓
 /plan <bead-id>           →  Create plan + testing strategy → plan.md
+      │                       (offers child beads for epics: bd-xxx.1, bd-xxx.2, ...)
       ↓
    [Review plan.md]       ←  HIGH LEVERAGE
       ↓
 /iterate <bead-id>        →  Update plan based on feedback (optional)
       ↓
-/implement <bead-id>      →  Execute plan + write tests (discovered-from for new issues)
+/implement <bead-id>      →  Execute plan (or single phase if child bead)
       ↓
    [Tests + Lint MUST pass] ← HARD GATE
       ↓
-/finish                   →  Verify gate → commit + sync + (optional: bd compact)
+/finish <bead-id>         →  Commit + close (child or parent when all children done)
 
 Session Continuity (use anytime):
 ──────────────────────────────────
@@ -56,6 +57,7 @@ A bead **CANNOT** be marked complete until:
 - [ ] **ALL** tests pass (existing + new)
 - [ ] Lint passes (if present)
 - [ ] All tests specified in plan's "Testing Strategy" are written
+- [ ] **For parent beads**: All child beads must be closed first
 
 ---
 
@@ -134,26 +136,38 @@ See `/implement` command for full coding standards.
 | `/create` | Subtask | Interview → bead (with templates) + spec.md |
 | `/start [bead-id]` | Main | bd ready → find/setup bead, load context |
 | `/research <bead-id>` | Subtask | Deep codebase exploration → research.md |
-| `/plan <bead-id>` | Subtask | Interactive planning → plan.md |
+| `/plan <bead-id>` | Subtask | Interactive planning → plan.md + optional child beads |
 | `/iterate <bead-id>` | Subtask | Update existing plan based on feedback |
-| `/implement <bead-id>` | Subtask | Execute plan, create discovered-from links |
-| `/finish [bead-id]` | Subtask | Review + commit + sync + push (+ bd compact) |
+| `/implement <bead-id>` | Subtask | Execute plan (single phase if child bead) |
+| `/finish [bead-id]` | Subtask | Commit + close bead (enforces hierarchy rules) |
 | `/handoff <bead-id>` | Subtask | Create handoff document for session continuity |
 | `/resume <bead-id>` | Subtask | Resume work from latest handoff |
 
 ### Usage
 
 ```bash
-# Full workflow
+# Full workflow (single bead)
 /create                   # Interview → bead + spec (uses templates)
 /start bd-xxx             # Setup workspace
 /research bd-xxx          # Explore codebase
 # [review research.md]
-/plan bd-xxx              # Create plan
+/plan bd-xxx              # Create plan (offers child beads for epics)
 # [review plan.md]
 /iterate bd-xxx           # Update plan if needed (optional)
 /implement bd-xxx         # Execute plan
 /finish                   # Wrap up
+
+# Atomic workflow (with child beads - recommended for epics)
+/create                   # Creates bd-xxx (epic)
+/plan bd-xxx              # Creates plan + child beads (bd-xxx.1, bd-xxx.2, bd-xxx.3)
+# [review plan.md]
+/implement bd-xxx.1       # Phase 1 only
+/finish bd-xxx.1          # Commit & close Phase 1
+/implement bd-xxx.2       # Phase 2 only
+/finish bd-xxx.2          # Commit & close Phase 2
+/implement bd-xxx.3       # Phase 3 only
+/finish bd-xxx.3          # Commit & close Phase 3
+/finish bd-xxx            # Close parent (creates PR)
 
 # Quick start (find existing bead)
 /start                    # Shows bd ready output, pick one
@@ -231,13 +245,39 @@ bd create --from-template bug "Auth fails" -p 0
 ```
 
 ### Hierarchical IDs (Work Breakdown)
+
+Child beads enable atomic, trackable work per phase:
+
 ```
-bd-a1b2      [epic] Auth System
-bd-a1b2.1    [task] Design login UI
-bd-a1b2.2    [task] Backend validation
-bd-a1b2.3    [epic] Password Reset (sub-epic)
-bd-a1b2.3.1  [task] Email templates
+bd-a1b2      [epic] Auth System        ← parent bead
+bd-a1b2.1    [task] Phase 1: Schema    ← child bead (created by /plan)
+bd-a1b2.2    [task] Phase 2: API       ← child bead
+bd-a1b2.3    [task] Phase 3: Frontend  ← child bead
 ```
+
+**Workflow with child beads:**
+```bash
+/create                    # Creates bd-a1b2 (epic)
+/plan bd-a1b2              # Creates plan.md + offers child beads
+                           # Creates bd-a1b2.1, bd-a1b2.2, bd-a1b2.3
+
+/implement bd-a1b2.1       # Work on Phase 1 ONLY
+/finish bd-a1b2.1          # Commit Phase 1, close child
+
+/implement bd-a1b2.2       # Work on Phase 2 ONLY
+/finish bd-a1b2.2          # Commit Phase 2, close child
+
+/implement bd-a1b2.3       # Work on Phase 3 ONLY
+/finish bd-a1b2.3          # Commit Phase 3, close child
+
+/finish bd-a1b2            # Close parent (all children must be closed)
+```
+
+**Benefits:**
+- Each phase independently trackable (`bd list` shows progress)
+- Atomic commits per phase
+- Can `/handoff` and `/resume` per phase
+- `bd ready` shows which phases are unblocked
 
 ### Dependency Types
 - `blocks` - Hard blocker (default)
@@ -281,6 +321,13 @@ Progress tracked in `plan.md`:
 - [x] Create handler
 - [ ] Add validation
 - [ ] Write tests
+
+## Child Beads (if created)
+| Phase | Bead ID | Status |
+|-------|---------|--------|
+| Phase 1: Setup | bd-xxx.1 | closed ✓ |
+| Phase 2: API | bd-xxx.2 | open |
+| Phase 3: Frontend | bd-xxx.3 | open |
 ```
 
 ---
@@ -348,3 +395,5 @@ All commands include `<claude4_guidance>` sections implementing:
 | Claude 4: Subagent Orchestration | Auto-delegation |
 | OpenCode: Subtasks | `subtask: true` |
 | Beads: Source of Truth | bd CLI for metadata |
+| Beads: Atomic Work Breakdown | Child beads (bd-xxx.1) for per-phase tracking |
+| Beads: Hierarchical Completion | Parent can't close until all children closed |

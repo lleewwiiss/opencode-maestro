@@ -54,6 +54,20 @@ Validate bead exists:
 bd show [detected-id] --json
 ```
 </detection_strategy>
+
+<detect_hierarchy>
+Determine if this is a child or parent bead:
+
+**Child bead** (ID contains `.`, e.g., `bd-xxx.2`):
+- This is Phase 2 of parent `bd-xxx`
+- Will close this child, check siblings
+- Parent stays open until all children closed
+
+**Parent bead**:
+- Check for children: `bd list --parent $BEAD_ID --json`
+- If children exist, verify all are closed before closing parent
+- If no children, close normally
+</detect_hierarchy>
 </phase>
 
 <phase name="review">
@@ -195,12 +209,6 @@ git log --oneline -n 3
 <bead_state_update>
 Update bead status based on completion:
 
-**Only if verification gate passed:**
-```bash
-# Close bead (only if tests + lint passed!)
-bd close $BEAD_ID --reason "Implementation complete - tests passing"
-```
-
 **If verification gate failed:**
 ```bash
 # Keep bead open - do NOT close
@@ -208,16 +216,95 @@ bd update $BEAD_ID --status in_progress
 # Return to /implement to fix issues
 ```
 
-Sync bead state:
-```bash
-bd sync
-```
-
 **RULE**: A bead can ONLY be closed if:
 - Build passes
 - ALL tests pass
 - Lint passes (if present)
 </bead_state_update>
+
+<child_bead_close>
+**If child bead (e.g., bd-xxx.2):**
+
+1. Close THIS child bead:
+```bash
+bd close $BEAD_ID --reason "Phase 2 complete - tests passing"
+```
+
+2. Check sibling status:
+```bash
+bd list --parent [parent-id] --json
+```
+
+3. Report sibling status:
+```
+Child Bead Closed: $BEAD_ID
+───────────────────────────
+
+Sibling Status:
+  [parent].1 - Phase 1: closed ✓
+  [parent].2 - Phase 2: closed ✓  ← just closed
+  [parent].3 - Phase 3: open
+
+[If all siblings closed]:
+All phases complete! Close parent with:
+  /finish [parent-id]
+
+[If siblings remain open]:
+Next phase:
+  /start [parent].3
+  /implement [parent].3
+```
+
+4. Update parent's plan.md with child status:
+```markdown
+## Child Beads
+| Phase | Bead ID | Status |
+|-------|---------|--------|
+| Phase 1 | bd-xxx.1 | closed ✓ |
+| Phase 2 | bd-xxx.2 | closed ✓ |
+| Phase 3 | bd-xxx.3 | open |
+```
+</child_bead_close>
+
+<parent_bead_close>
+**If parent bead:**
+
+1. Check for children:
+```bash
+bd list --parent $BEAD_ID --json
+```
+
+2. **If children exist**, verify ALL are closed:
+```
+Parent bead has children:
+  $BEAD_ID.1 - [closed/open]
+  $BEAD_ID.2 - [closed/open]
+  $BEAD_ID.3 - [closed/open]
+
+[If any open]:
+⛔ Cannot close parent - children still open:
+  - $BEAD_ID.3 is still open
+
+Complete remaining children first:
+  /implement $BEAD_ID.3
+  /finish $BEAD_ID.3
+
+[If all closed]:
+All children complete. Closing parent bead.
+```
+
+3. **If all children closed OR no children**, close parent:
+```bash
+bd close $BEAD_ID --reason "All phases complete - tests passing"
+```
+</parent_bead_close>
+
+<sync_state>
+Sync bead state:
+```bash
+bd sync
+```
+</sync_state>
 
 <memory_decay>
 **Memory Decay (Optional)**
@@ -246,7 +333,44 @@ Push branch:
 git push -u origin HEAD
 ```
 
-Present completion summary:
+**For child bead**, present:
+
+```
+Phase Complete: $BEAD_ID
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+Commits
+───────
+[hash] feat($BEAD_ID): [phase description]
+[hash] test($BEAD_ID): add tests for [phase]
+
+Bead Status
+───────────
+$BEAD_ID: closed ✓
+
+Parent: [parent-id]
+Siblings:
+  [parent].1 - closed ✓
+  [parent].2 - closed ✓  ← this one
+  [parent].3 - open
+
+Branch  
+──────
+Pushed to: origin/[branch]
+
+Next Steps
+──────────
+[If siblings remain]:
+1. Continue with next phase:
+   /start [parent].3
+   /implement [parent].3
+
+[If all siblings done]:
+1. Close parent: /finish [parent-id]
+2. Create PR: gh pr create --title "[type]: [title]" --body "Refs: [parent-id]"
+```
+
+**For parent bead (standalone or all children done)**, present:
 
 ```
 Session Complete: $BEAD_ID
@@ -260,6 +384,7 @@ Commits
 Bead Status
 ───────────
 Status: closed
+[If had children]: All child beads closed
 Artifacts: review.md updated
 
 Branch  
@@ -298,4 +423,7 @@ Follow-up Beads (if any)
 - If significant deviations found, ask user before proceeding
 - A bead CANNOT be closed until: build passes, ALL tests pass, lint passes
 - No exceptions to the test/lint gate - broken code never gets committed
+- **HIERARCHY RULE**: Parent bead cannot close until ALL children are closed
+- **HIERARCHY RULE**: When closing child, always report sibling status
+- **HIERARCHY RULE**: Guide user to next open sibling after closing child
 </constraints>

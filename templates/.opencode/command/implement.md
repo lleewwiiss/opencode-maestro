@@ -61,15 +61,72 @@ Execute the plan phase by phase, making small reviewable changes, running tests 
 <phase name="orient">
 ## Phase 1: Orient
 
+<detect_bead_type>
+Determine if this is a child bead (single phase) or parent bead (all phases):
+
+```bash
+bd show $1 --json
+```
+
+**Child bead** (ID contains `.`, e.g., `bd-xxx.1`):
+- Execute ONLY the corresponding phase
+- Has a parent bead with full plan
+
+**Parent bead with children** (has child beads):
+- Check: `bd list --parent $1 --json`
+- If children exist, recommend working on children instead
+- Show which children are open/closed
+
+**Parent bead without children** (standalone):
+- Execute all phases (original behavior)
+</detect_bead_type>
+
+<resolve_plan_location>
+Find the plan:
+
+**If child bead ($1 = bd-xxx.N):**
+- Extract parent ID: `bd-xxx` (remove `.N` suffix)
+- Plan location: `.beads/artifacts/[parent-id]/plan.md`
+- This child maps to Phase N in the plan
+
+**If parent bead:**
+- Plan location: `.beads/artifacts/$1/plan.md`
+</resolve_plan_location>
+
+<check_for_children>
+If parent bead, check for existing children:
+
+```bash
+bd list --parent $1 --json
+```
+
+If children exist:
+```
+This bead has child beads for atomic tracking:
+
+  $1.1 - Phase 1: [name] - [status]
+  $1.2 - Phase 2: [name] - [status]  
+  $1.3 - Phase 3: [name] - [status]
+
+Recommend: Work on child beads individually:
+  /implement $1.1
+
+Or continue with all phases? (children / all)
+```
+
+If user chooses "children", stop and let them run `/implement $1.1`.
+</check_for_children>
+
 <read_plan>
 Read completely before coding:
 
-1. **Plan**: `.beads/artifacts/$1/plan.md`
-2. **Research** (for context): `.beads/artifacts/$1/research.md`
+1. **Plan**: `[resolved plan location]`
+2. **Research** (for context): `.beads/artifacts/[parent-id]/research.md`
 3. **Build commands** from plan (or infer from package.json/Makefile)
 
 Identify:
-- Which phase is next (look for unchecked items)
+- **If child bead**: Only Phase N (where N = child number)
+- **If parent bead**: All unchecked phases
 - What files need to change
 - What success criteria to verify
 </read_plan>
@@ -80,6 +137,27 @@ If plan doesn't have Build & Test Commands section:
 2. Add the commands to plan.md
 3. This prevents repeated discovery in future context windows
 </infer_commands>
+
+<scope_for_child_bead>
+**If child bead (e.g., $1 = bd-xxx.2):**
+
+Only execute Phase 2 from the plan. Ignore other phases.
+
+```
+Implementing: $1 (Phase 2 of bd-xxx)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Scope: Phase 2 ONLY
+Parent: bd-xxx
+Plan: .beads/artifacts/bd-xxx/plan.md
+
+Phase 2: [Name]
+───────────────
+[Steps from Phase 2]
+
+Other phases are handled by sibling beads.
+```
+</scope_for_child_bead>
 </phase>
 
 <phase name="execute_loop">
@@ -216,8 +294,19 @@ Note: `discovered-from` dependencies automatically inherit the parent's `source_
 <phase name="completion">
 ## Phase 5: Completion
 
+<determine_completion_scope>
+**If child bead (single phase):**
+- Only mark THIS phase complete
+- Update parent's plan.md with phase status
+- Close child bead, check sibling status
+
+**If parent bead (all phases):**
+- Mark all phases complete
+- Close parent bead
+</determine_completion_scope>
+
 <all_phases_done>
-When ALL phases are complete:
+When target phases are complete:
 
 1. **Run FINAL verification suite** (MANDATORY GATE):
 ```bash
@@ -227,7 +316,7 @@ npm test         # ALL tests
 npm run lint     # Lint (if present)
 ```
 
-2. **Verify Testing Strategy complete**:
+2. **Verify Testing Strategy complete** (for phases in scope):
    - All "New Tests to Write" items are checked off
    - All "Existing Tests to Update" items are checked off
    - Test coverage requirements met
@@ -238,7 +327,22 @@ npm run lint     # Lint (if present)
    - [ ] Lint passes (no errors, warnings acceptable)
    - [ ] All planned tests are written and passing
 
-4. Only if gate passes, update plan.md with completion status:
+4. Only if gate passes, update plan.md:
+
+**For child bead:**
+```markdown
+## Phase N: [Name] ✓ COMPLETE
+[Mark all steps as [x]]
+
+## Child Beads
+| Phase | Bead ID | Status |
+|-------|---------|--------|
+| Phase 1 | $PARENT.1 | closed |
+| Phase 2 | $PARENT.2 | closed |  ← just completed
+| Phase 3 | $PARENT.3 | open |
+```
+
+**For parent bead:**
 ```markdown
 ---
 status: complete
@@ -247,8 +351,41 @@ tests_passing: true
 lint_passing: true
 ---
 ```
+</all_phases_done>
 
-5. Present completion summary:
+<child_bead_completion>
+**If child bead**, present:
+
+```
+Phase Complete: $1
+━━━━━━━━━━━━━━━━━━
+
+Phase [N]: [name] ✓
+
+Verification
+────────────
+✓ Build passes
+✓ Tests pass
+✓ Lint clean
+
+Parent Bead: [parent-id]
+────────────────────────
+Sibling Status:
+  [parent].1 - Phase 1: [closed/open]
+  [parent].2 - Phase 2: [closed/open] ← YOU ARE HERE
+  [parent].3 - Phase 3: [closed/open]
+
+Next Step
+─────────
+Run /finish $1 to commit this phase.
+
+Then continue with next phase:
+  /implement [parent].3
+```
+</child_bead_completion>
+
+<parent_bead_completion>
+**If parent bead (all phases)**, present:
 
 ```
 Implementation Complete: $1
@@ -283,10 +420,12 @@ Next Step
 ─────────
 Run /finish to review, commit, and push.
 ```
+</parent_bead_completion>
 
+<blocker>
 **BLOCKER**: If tests or lint fail, DO NOT proceed to /finish!
 Report failures and fix them first.
-</all_phases_done>
+</blocker>
 </phase>
 
 </workflow>
