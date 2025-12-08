@@ -29,8 +29,8 @@ if detect_github_info; then
     echo "Detected repository: $GITHUB_USER/$GITHUB_REPO"
 else
     # Fallback defaults
-    GITHUB_USER="lleewwiiss"
-    GITHUB_REPO="opencode-maestro"
+    GITHUB_USER="DorelRoata"
+    GITHUB_REPO="opencodeagents"
     echo "Could not detect git remote, using defaults: $GITHUB_USER/$GITHUB_REPO"
 fi
 BRANCH="main"

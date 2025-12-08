@@ -122,10 +122,10 @@ Run this command in the root of your project:
 
 ```bash
 # Local install (current directory)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/DorelRoata/opencode-maestro/main/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/DorelRoata/opencodeagents/main/install.sh)"
 
 # Global install (for all projects)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/DorelRoata/opencode-maestro/main/install.sh)" -- -g
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/DorelRoata/opencodeagents/main/install.sh)" -- -g
 
 # Show help
 ./install.sh --help
@@ -135,10 +135,10 @@ Run this command in the root of your project:
 
 ```powershell
 # One-liner install (run in your project folder)
-iwr https://raw.githubusercontent.com/DorelRoata/opencode-maestro/main/install.ps1 -UseBasicParsing | iex
+iwr https://raw.githubusercontent.com/DorelRoata/opencodeagents/main/install.ps1 -UseBasicParsing | iex
 
 # Or with global flag
-powershell -c "& { iwr https://raw.githubusercontent.com/DorelRoata/opencode-maestro/main/install.ps1 -UseBasicParsing -OutFile install.ps1; .\install.ps1 -Global; rm install.ps1 }"
+powershell -c "& { iwr https://raw.githubusercontent.com/DorelRoata/opencodeagents/main/install.ps1 -UseBasicParsing -OutFile install.ps1; .\install.ps1 -Global; rm install.ps1 }"
 ```
 
 **For forks**: The install script auto-detects your GitHub user/repo from `git remote origin`, so forked repos work automatically.
