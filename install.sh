@@ -104,6 +104,8 @@ install_file ".opencode/agent/codebase-analyzer.md" "$TARGET_DIR/agent/codebase-
 install_file ".opencode/agent/codebase-locator.md" "$TARGET_DIR/agent/codebase-locator.md"
 install_file ".opencode/agent/codebase-pattern-finder.md" "$TARGET_DIR/agent/codebase-pattern-finder.md"
 install_file ".opencode/agent/code-reviewer.md" "$TARGET_DIR/agent/code-reviewer.md"
+install_file ".opencode/agent/commit-message-writer.md" "$TARGET_DIR/agent/commit-message-writer.md"
+install_file ".opencode/agent/test-writer.md" "$TARGET_DIR/agent/test-writer.md"
 install_file ".opencode/agent/web-search-researcher.md" "$TARGET_DIR/agent/web-search-researcher.md"
 
 # Install Commands
