@@ -30,7 +30,7 @@ if detect_github_info; then
 else
     # Fallback defaults
     GITHUB_USER="DorelRoata"
-    GITHUB_REPO="opencodeagents"
+    GITHUB_REPO="opencodeagentflow"
     echo "Could not detect git remote, using defaults: $GITHUB_USER/$GITHUB_REPO"
 fi
 BRANCH="main"

@@ -15,7 +15,7 @@ if ($Help) {
 
 # Configuration
 $GitHubUser = "DorelRoata"
-$GitHubRepo = "opencodeagents"
+$GitHubRepo = "opencodeagentflow"
 $Branch = "main"
 $BaseUrl = "https://raw.githubusercontent.com/$GitHubUser/$GitHubRepo/$Branch/templates/.opencode"
 
