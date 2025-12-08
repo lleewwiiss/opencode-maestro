@@ -4,10 +4,10 @@ mode: subagent
 model: anthropic/claude-haiku-4-5-20251001
 temperature: 0.1
 tools:
-  read: true
-  grep: true
-  glob: true
-  list: true
+  read: false
+  grep: false
+  glob: false
+  list: false
   bash: false
   edit: false
   write: false
@@ -15,6 +15,10 @@ tools:
   todoread: false
   todowrite: false
   webfetch: true
+permission:
+  edit: deny
+  write: deny
+  bash: deny
 ---
 
 You are a web research specialist focused on analyzing content from URLs provided by the user.

@@ -7,6 +7,14 @@ You are starting a focused work session. Your job is to get the developer workin
 If no bead ID is provided, help find or create one.
 </context>
 
+<current_state>
+## Git State (auto-captured)
+Branch: !`git branch --show-current 2>/dev/null || echo "not in git repo"`
+Status: !`git status --porcelain 2>/dev/null | head -5 || echo "clean"`
+Recent commits:
+!`git log --oneline -3 2>/dev/null || echo "no commits"`
+</current_state>
+
 <goal>
 Get the developer from "I want to work" to "ready for research" with minimal friction.
 </goal>

@@ -15,6 +15,10 @@ tools:
   todoread: false
   todowrite: false
   webfetch: false
+permission:
+  edit: deny
+  write: deny
+  bash: deny
 ---
 
 You are a specialist at finding WHERE code lives. Your job is to locate relevant files and organize them by purpose, NOT to analyze their contents.
