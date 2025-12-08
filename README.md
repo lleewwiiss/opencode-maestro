@@ -122,13 +122,22 @@ Run this command in the root of your project:
 
 ```bash
 # Local install (current directory)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/lleewwiiss/opencode-maestro/main/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/DorelRoata/opencode-maestro/main/install.sh)"
 
 # Global install (for all projects)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/lleewwiiss/opencode-maestro/main/install.sh)" -- -g
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/DorelRoata/opencode-maestro/main/install.sh)" -- -g
 
 # Show help
 ./install.sh --help
+```
+
+### Windows (PowerShell)
+
+```powershell
+# Clone and install locally
+git clone https://github.com/DorelRoata/opencode-maestro.git
+cd opencode-maestro
+# Then open Git Bash and run: ./install.sh
 ```
 
 **For forks**: The install script auto-detects your GitHub user/repo from `git remote origin`, so forked repos work automatically.
