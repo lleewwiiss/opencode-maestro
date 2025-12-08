@@ -2,9 +2,37 @@
 
 set -e
 
-# Configuration
-GITHUB_USER="lleewwiiss" # Change this to your username if forking
-GITHUB_REPO="opencode-maestro"
+# Auto-detect GitHub user/repo from git remote, with fallbacks
+detect_github_info() {
+    local remote_url
+    remote_url=$(git remote get-url origin 2>/dev/null || echo "")
+
+    if [[ -n "$remote_url" ]]; then
+        # Handle SSH format: git@github.com:user/repo.git
+        if [[ "$remote_url" =~ git@github\.com:([^/]+)/([^/.]+)(\.git)?$ ]]; then
+            GITHUB_USER="${BASH_REMATCH[1]}"
+            GITHUB_REPO="${BASH_REMATCH[2]}"
+            return 0
+        fi
+        # Handle HTTPS format: https://github.com/user/repo.git
+        if [[ "$remote_url" =~ github\.com/([^/]+)/([^/.]+)(\.git)?$ ]]; then
+            GITHUB_USER="${BASH_REMATCH[1]}"
+            GITHUB_REPO="${BASH_REMATCH[2]}"
+            return 0
+        fi
+    fi
+    return 1
+}
+
+# Configuration with auto-detection
+if detect_github_info; then
+    echo "Detected repository: $GITHUB_USER/$GITHUB_REPO"
+else
+    # Fallback defaults
+    GITHUB_USER="lleewwiiss"
+    GITHUB_REPO="opencode-maestro"
+    echo "Could not detect git remote, using defaults: $GITHUB_USER/$GITHUB_REPO"
+fi
 BRANCH="main"
 
 # Parse Arguments
@@ -18,9 +46,14 @@ while [[ "$#" -gt 0 ]]; do
             TARGET_DIR="$HOME/.config/opencode"
             INSTALL_TYPE="Global"
             ;;
-        *) 
-            # If unknown arg, maybe it's for something else, but for now ignore or error?
-            # Let's just ignore unknown args to be safe or print warning
+        -h|--help)
+            echo "Usage: install.sh [-g|--global] [-h|--help]"
+            echo "  -g, --global  Install to ~/.config/opencode instead of ./.opencode"
+            echo "  -h, --help    Show this help message"
+            exit 0
+            ;;
+        *)
+            echo "Warning: Unknown argument '$1' ignored"
             ;;
     esac
     shift
@@ -31,8 +64,13 @@ echo "📍 Location: $INSTALL_TYPE ($TARGET_DIR)"
 
 # 1. Check Dependencies
 if ! command -v bd &> /dev/null; then
-    echo "📦 Beads (bd) not found."
-    echo "   Please install it: https://github.com/beads-dev/beads"
+    echo ""
+    echo "⚠️  Warning: Beads CLI (bd) not found."
+    echo "   The workflow commands require 'bd' for issue tracking."
+    echo "   Install it from: https://github.com/beads-dev/beads"
+    echo ""
+    echo "   Continuing installation, but /create and /start commands won't work without it."
+    echo ""
 fi
 
 # 2. Setup Directories
@@ -65,6 +103,7 @@ install_file() {
 install_file ".opencode/agent/codebase-analyzer.md" "$TARGET_DIR/agent/codebase-analyzer.md"
 install_file ".opencode/agent/codebase-locator.md" "$TARGET_DIR/agent/codebase-locator.md"
 install_file ".opencode/agent/codebase-pattern-finder.md" "$TARGET_DIR/agent/codebase-pattern-finder.md"
+install_file ".opencode/agent/code-reviewer.md" "$TARGET_DIR/agent/code-reviewer.md"
 install_file ".opencode/agent/web-search-researcher.md" "$TARGET_DIR/agent/web-search-researcher.md"
 
 # Install Commands
