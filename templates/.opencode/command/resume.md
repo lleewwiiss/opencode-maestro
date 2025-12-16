@@ -12,6 +12,15 @@ A previous session created a handoff to preserve context. Your job is to:
 4. Continue work seamlessly
 </context>
 
+<current_state>
+## Current State (auto-captured for validation)
+Branch: !`git branch --show-current 2>/dev/null`
+Commit: !`git rev-parse --short HEAD 2>/dev/null`
+Repository: !`git remote get-url origin 2>/dev/null || echo "local"`
+Uncommitted changes:
+!`git status --porcelain 2>/dev/null | head -5 || echo "none"`
+</current_state>
+
 <claude4_guidance>
 - Read the handoff document completely
 - Verify current state matches what handoff describes

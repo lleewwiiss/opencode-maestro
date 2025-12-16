@@ -10,6 +10,17 @@ This is how we handle context window limits gracefully. Instead of losing contex
 Create a thorough but CONCISE document - capture essential state without bloat.
 </context>
 
+<current_state>
+## Session State (auto-captured)
+Branch: !`git branch --show-current 2>/dev/null`
+Commit: !`git rev-parse --short HEAD 2>/dev/null`
+Repository: !`git remote get-url origin 2>/dev/null || echo "local"`
+Uncommitted changes:
+!`git status --porcelain 2>/dev/null | head -10`
+Recent work:
+!`git log --oneline -5 2>/dev/null`
+</current_state>
+
 <claude4_guidance>
 - Capture ALL essential state, but filter out noise
 - Include specific file:line references, not vague descriptions

@@ -122,11 +122,26 @@ Run this command in the root of your project:
 
 ```bash
 # Local install (current directory)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/lleewwiiss/opencode-maestro/main/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/DorelRoata/opencodeagentflow/main/install.sh)"
 
 # Global install (for all projects)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/lleewwiiss/opencode-maestro/main/install.sh)" -- -g
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/DorelRoata/opencodeagentflow/main/install.sh)" -- -g
+
+# Show help
+./install.sh --help
 ```
+
+### Windows (PowerShell)
+
+```powershell
+# One-liner install (run in your project folder)
+iwr https://raw.githubusercontent.com/DorelRoata/opencodeagentflow/main/install.ps1 -UseBasicParsing | iex
+
+# Or with global flag
+powershell -c "& { iwr https://raw.githubusercontent.com/DorelRoata/opencodeagentflow/main/install.ps1 -UseBasicParsing -OutFile install.ps1; .\install.ps1 -Global; rm install.ps1 }"
+```
+
+**For forks**: The install script auto-detects your GitHub user/repo from `git remote origin`, so forked repos work automatically.
 
 ## What it installs
 
@@ -146,12 +161,17 @@ Run this command in the root of your project:
 
 ### Subagents (`.opencode/agent/`)
 
-| Agent | Purpose |
-|-------|---------|
-| `codebase-locator` | Fast file/component finding |
-| `codebase-analyzer` | Deep code understanding with file:line refs |
-| `codebase-pattern-finder` | Find similar implementations |
-| `web-search-researcher` | Analyze content from URLs |
+| Agent | Model | Purpose |
+|-------|-------|---------|
+| `codebase-locator` | haiku | Fast file/component finding |
+| `codebase-analyzer` | opus | Deep code understanding with file:line refs |
+| `codebase-pattern-finder` | opus | Find similar implementations to model after |
+| `code-reviewer` | opus | Review for bugs, security, performance, conventions |
+| `test-writer` | opus | Generate tests following codebase patterns |
+| `commit-message-writer` | haiku | Craft conventional commit messages |
+| `web-search-researcher` | haiku | Analyze content from URLs |
+
+All agents use explicit permission controls (`permission: { bash: deny, edit: deny }`) for safety.
 
 ### Protocols
 
