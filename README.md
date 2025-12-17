@@ -155,8 +155,9 @@ A bead **CANNOT** be marked complete until:
 ## The Stack
 
 - **[OpenCode](https://opencode.ai)**: The AI Coding Agent
+- **[oh-my-opencode](https://github.com/code-yeongyu/oh-my-opencode)**: Multi-model agent orchestration plugin
 - **[Beads (bd)](https://github.com/steveyegge/beads)**: Lightweight, CLI-first issue tracking that lives in git
-- **[HumanLayer](https://github.com/humanlayer/humanlayer)**: Creators of the "Context Engineering" and "12-Factor Agent" methodologies
+- **[HumanLayer](https://github.com/humanlayer/humanlayer)**: Creators of the ACE-FCA methodology
 
 ## Design Decisions
 
@@ -190,20 +191,21 @@ We evaluated Claude Code Skills (model-invoked SKILL.md files) but chose OpenCod
 
 ### Artifact Files
 
-**Decision:** Treat artifacts as compactions: keep `spec.md`, delete the rest.
+**Decision:** Artifacts are working files, not permanent documentation. Delete after PR merge.
 
 | Artifact | During Work | After PR Merge |
 |----------|-------------|----------------|
-| `spec.md` | `.beads/artifacts/<bead-id>/` | Keep (intent + acceptance criteria) |
-| `research.md` | `.beads/artifacts/<bead-id>/` | Delete - served its purpose |
-| `plan.md` | `.beads/artifacts/<bead-id>/` | Delete - served its purpose |
-| `review.md` | `.beads/artifacts/<bead-id>/` | Delete - served its purpose |
-| `handoffs/` | `.beads/artifacts/<bead-id>/` | Delete - work is complete |
+| `spec.md` | `.beads/artifacts/<bead-id>/` | Bead metadata suffices |
+| `research.md` | `.beads/artifacts/<bead-id>/` | Delete |
+| `plan.md` | `.beads/artifacts/<bead-id>/` | Delete |
+| `review.md` | `.beads/artifacts/<bead-id>/` | Delete |
+| `handoffs/` | `.beads/artifacts/<bead-id>/` | Delete |
 
 **Rationale:**
-- `spec.md` is the durable artifact ("specs are the new code")
-- `research.md`/`plan.md`/`review.md`/`handoffs/` are intentionally short-lived compactions and become stale fast
-- PR description captures the high-level "why"; git history captures the "what"
+- Artifacts exist to guide implementation, not as permanent documentation
+- PR description captures the "why" for posterity
+- Git history has the "what" (the actual changes)
+- Keeping stale artifacts creates confusion
 
 ## Installation
 
@@ -267,9 +269,9 @@ We evaluated Claude Code Skills (model-invoked SKILL.md files) but chose OpenCod
 ### Session Continuity
 
 When context window approaches limit:
-1. Run `/handoff <bead-id>` to capture current state
+1. Run `/handoff` to capture current state
 2. End session gracefully  
-3. Start new session with `/rehydrate <bead-id>`
+3. Start new session with `/rehydrate`
 4. Continue work seamlessly from handoff
 
 ## Human Review Points

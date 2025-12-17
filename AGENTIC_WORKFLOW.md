@@ -261,13 +261,15 @@ See `/implement` command for full coding standards.
 |---------|---------|---------|
 | `/create` | Subtask | Interview → bead (with templates) + spec.md |
 | `/start [bead-id]` | Main | bd ready → find/setup bead, load context |
+| `/scout <target>` | Main | Quick async exploration (fire-and-forget) |
 | `/research <bead-id>` | Subtask | **Interactive:** explore → present → iterate → research.md |
 | `/plan <bead-id>` | Subtask | **Interactive:** generate → walk through → iterate → plan.md + child beads |
 | `/iterate <bead-id>` | Subtask | Update existing plan based on feedback |
-| `/implement <bead-id>` | Subtask | Execute plan (single phase if child bead) |
-| `/finish [bead-id]` | Subtask | Commit + close bead (enforces hierarchy rules) |
-| `/handoff <bead-id>` | Subtask | Create handoff document for session continuity |
-| `/rehydrate <bead-id>` | Subtask | Resume work from latest handoff |
+| `/implement <bead-id>` | Subtask | Execute plan with coach checkpoints |
+| `/coach <bead-id>` | Subtask | Adversarial validation against spec.md |
+| `/finish [bead-id]` | Subtask | Coach review → commit + close bead |
+| `/handoff` | Subtask | Create handoff document for session continuity |
+| `/rehydrate` | Subtask | Resume work from latest handoff |
 
 ### Atomic Workflow (Single Task)
 
