@@ -72,6 +72,11 @@ git status --porcelain
 
 If dirty, ask user to stash, commit, or continue.
 
+**Ensure artifacts are gitignored** (local-only, never committed):
+```bash
+grep -q ".beads/artifacts" .gitignore 2>/dev/null || echo ".beads/artifacts/" >> .gitignore
+```
+
 **For worktree:**
 ```bash
 git worktree add ../$BEAD_ID -b $BEAD_ID

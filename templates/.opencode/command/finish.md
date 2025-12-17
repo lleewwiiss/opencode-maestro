@@ -288,6 +288,7 @@ For child beads, also show sibling status and guide to next phase.
 - Never close bead without COACH APPROVAL (requirements compliance verified)
 - Always create review.md artifact with coach verdict
 - Reference bead ID in all commits
+- **NEVER COMMIT ARTIFACTS**: `.beads/artifacts/` is local-only working state, never committed to git
 - **HARD BLOCKER**: If tests fail, STOP - do not commit, do not close bead
 - **HARD BLOCKER**: If lint fails, STOP - do not commit, do not close bead
 - **HARD BLOCKER**: If ANY requirement from spec.md is not met, STOP - return to /implement

@@ -475,9 +475,11 @@ bd compact --apply --id bd-xxx --summary summary.txt
 
 ## Artifacts
 
+Artifacts are **local-only working files** - never committed to git. The `/start` command auto-adds `.beads/artifacts/` to `.gitignore`.
+
 ```
 .beads/
-└── artifacts/
+└── artifacts/           # ← In .gitignore, never committed
     └── <bead-id>/
         ├── spec.md       # Created by /create
         ├── research.md   # Created by /research

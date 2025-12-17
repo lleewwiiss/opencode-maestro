@@ -165,4 +165,5 @@ Next Step: /start <bead-id>
 - Generate title yourself - don't ask user
 - Confirm with user before creating bead
 - Always create spec.md after bead creation
+- **ARTIFACTS ARE LOCAL-ONLY**: `.beads/artifacts/` should be in `.gitignore`, never committed
 </constraints>
