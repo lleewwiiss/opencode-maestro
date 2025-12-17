@@ -1,20 +1,28 @@
 ---
 description: Create handoff document for session continuity - capture state before context limit
-subtask: true
 ---
 <context>
 You are creating a handoff document to transfer work to a future session.
 
-This is how we handle context window limits gracefully. Instead of losing context, we compact it into a structured artifact that can bootstrap a fresh session.
+This is how we handle context window limits gracefully. Instead of losing context, we compact it into a structured artifact that can bootstrap a fresh session. This implements "Frequent Intentional Compaction" from ACE-FCA.
 
 Create a thorough but CONCISE document - capture essential state without bloat.
 </context>
 
-<claude4_guidance>
-- Capture ALL essential state, but filter out noise
-- Include specific file:line references, not vague descriptions
-- Ground all learnings in actual code references
-</claude4_guidance>
+<ground_all_claims>
+Capture ALL essential state, but filter out noise. Include specific file:line references, not vague descriptions. Ground all learnings in actual code references so the next session can verify.
+
+Bad: "Working on authentication improvements"
+Good: "Implementing JWT refresh in auth/token.ts:45-89, currently stuck on expiry calculation at line 67"
+</ground_all_claims>
+
+<use_parallel_tool_calls>
+Gather all state information in parallel: git status, bd show, file listings, artifact reads. Collect everything needed for the handoff in one parallel batch.
+</use_parallel_tool_calls>
+
+<state_tracking>
+Use structured format for state data (JSON for test status, task progress). Use unstructured text for learnings and context. This helps the next session parse state quickly.
+</state_tracking>
 
 <goal>
 Create a handoff document that allows a fresh session to continue work seamlessly.
@@ -67,6 +75,22 @@ Capture these categories:
 **Learnings:** What did we discover? Root causes? Patterns? Constraints?
 **Next Steps:** What should the next session do first?
 **Open Issues:** Blockers? Failing tests? Decisions needed?
+
+<child_bead_context>
+**If this is a child bead ($1 contains `.`):**
+
+Extract parent ID:
+```bash
+PARENT_ID=$(echo "$1" | sed 's/\..*//')
+```
+
+Include parent context references in the handoff:
+- Parent's research: `.beads/artifacts/$PARENT_ID/research.md`
+- Parent's plan: `.beads/artifacts/$PARENT_ID/plan.md`
+- Which phase number this child represents (extract N from bd-xxx.N)
+
+This ensures `/rehydrate` has full epic context to continue work.
+</child_bead_context>
 </phase>
 
 <phase name="write_handoff">
@@ -100,6 +124,13 @@ status: [in_progress | blocked | ready_for_review]
 - `.beads/artifacts/$1/plan.md` - Phase N in progress
 - `path/to/key/file.ts` - Main file being modified
 
+## Parent Context (if child bead)
+<!-- Include if $1 contains "." -->
+- Parent bead: $PARENT_ID
+- Parent research: `.beads/artifacts/$PARENT_ID/research.md`
+- Parent plan: `.beads/artifacts/$PARENT_ID/plan.md`
+- This is Phase [N] of the epic
+
 ## Recent Changes
 - `src/file.ts:45-67` - [What was changed]
 
@@ -118,9 +149,9 @@ status: [in_progress | blocked | ready_for_review]
 ## Blockers
 - [Or "None"]
 
-## To Resume
+## To Rehydrate
 ```bash
-/resume $1
+/rehydrate $1
 ```
 ```
 </phase>
@@ -141,7 +172,7 @@ Progress: [X/Y steps]
 
 Artifact: .beads/artifacts/$1/handoffs/<timestamp>_handoff.md
 
-To Resume: /resume $1
+To Rehydrate: /rehydrate $1
 ```
 </phase>
 

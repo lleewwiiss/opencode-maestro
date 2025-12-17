@@ -1,26 +1,39 @@
 ---
-description: Resume work from handoff document - restore context and continue
-subtask: true
+description: Rehydrate work from handoff document - restore context and continue
 ---
 <context>
-You are resuming work from a handoff document.
+You are rehydrating work from a handoff document.
 
 A previous session created a handoff to preserve context. Your job is to:
 1. Read and understand the handoff
 2. Validate current state matches expectations
 3. Load necessary context
 4. Continue work seamlessly
+
+The goal is seamless continuation - the user shouldn't notice the context switch occurred.
 </context>
 
-<claude4_guidance>
-- Read the handoff document completely
-- Verify current state matches what handoff describes
-- Don't assume - validate that referenced files exist
-- Present what you found before continuing
-</claude4_guidance>
+<investigate_before_acting>
+Read the handoff document completely before taking any action. Verify current state matches what handoff describes. Don't assume - validate that referenced files exist and haven't changed.
+
+This prevents working from stale context that leads to incorrect changes.
+</investigate_before_acting>
+
+<use_parallel_tool_calls>
+Validate state in parallel: run git status, git rev-parse HEAD, bd show, and file existence checks simultaneously. Compare all results against handoff expectations in one batch.
+</use_parallel_tool_calls>
+
+<state_verification>
+If state has diverged (new commits, changed files, different branch), surface this immediately. Don't silently proceed with stale context - ask user how to handle the divergence.
+
+Divergence scenarios:
+- Commit changed: Show `git log [handoff_commit]..HEAD` to reveal intervening changes
+- Files missing: List missing references, ask to confirm before proceeding
+- Branch different: Ask whether to switch or proceed on current branch
+</state_verification>
 
 <goal>
-Resume work seamlessly from a handoff, as if no context switch occurred.
+Rehydrate work seamlessly from a handoff, as if no context switch occurred.
 </goal>
 
 <principles>
@@ -105,7 +118,7 @@ ls -la [path/to/key/file.ts]  # for each referenced file
 ## Phase 4: Present Restored Context
 
 ```
-Resuming: $1
+Rehydrating: $1
 ━━━━━━━━━━━━
 
 From Handoff: [date]

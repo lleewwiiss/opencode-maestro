@@ -1,19 +1,32 @@
 ---
-description: Finish work on a bead - review, commit, sync, and push
-subtask: true
+description: Finish work on a bead - coach review, commit, sync, and push
 ---
 <context>
-You are completing a work session on a bead. Your job is to validate the implementation, create atomic commits, sync bead state, and prepare for PR/merge.
+You are completing a work session on a bead. Your job is to:
+1. Run adversarial coach review against original requirements
+2. Validate the implementation passes all verification gates
+3. Create atomic commits and sync bead state
 
-This is a high-leverage review point - catch issues before they reach the PR.
+This command implements the "coach" role from dialectical autocoding - independent validation that doesn't trust the implementing agent's self-report of success.
 </context>
 
-<claude4_guidance>
-- Run verification commands (build, test, lint) in parallel
-- Read plan.md and verify each phase was actually completed
-- Check git diff against planned changes - ensure no unplanned modifications
-- Once verification passes, proceed with commits without asking for additional confirmation
-</claude4_guidance>
+<investigate_before_finishing>
+Read ALL relevant artifacts before any assessment. You MUST:
+1. Read spec.md to understand original requirements
+2. Read plan.md to verify each phase was completed
+3. Check git diff against planned changes
+4. Run verification commands (build, test, lint)
+
+Do not trust claims of completion. Verify independently.
+</investigate_before_finishing>
+
+<use_parallel_tool_calls>
+Run verification commands (build, test, lint) in parallel. Read multiple artifacts in parallel. Once verification passes, proceed with commits without asking for additional confirmation.
+</use_parallel_tool_calls>
+
+<default_to_action>
+After coach approval, proceed directly with commits. Do not re-ask for confirmation on already-approved work.
+</default_to_action>
 
 <goal>
 Bring work to clean completion: validate against plan, commit atomically, sync beads, push, report next steps.
@@ -49,8 +62,10 @@ Determine if child or parent bead:
 - **Parent bead**: Check for children with `bd list --parent $BEAD_ID --json`
 </phase>
 
-<phase name="review">
-## Phase 2: Review Implementation
+<phase name="coach_review">
+## Phase 2: Adversarial Coach Review
+
+This phase implements independent validation from Block's dialectical autocoding research. The key insight: "Discard the implementing agent's self-report of success and have the coach perform an independent evaluation."
 
 <mandatory_verification_gate>
 **MANDATORY GATE - Run BEFORE any commits:**
@@ -68,7 +83,30 @@ npm run lint   # or cargo clippy, ruff, golangci-lint, etc.
 - Return to /implement to fix issues
 </mandatory_verification_gate>
 
-Only after gate passes, gather review context:
+<requirements_compliance_check>
+**After verification passes, validate against ORIGINAL requirements:**
+
+1. **Read spec.md completely** - This is your evaluation anchor
+2. **For EACH requirement in spec.md**, verify independently:
+   - Functional requirements: implemented with file:line evidence
+   - Non-functional requirements: met with evidence
+   - Success criteria: verified (how?)
+   - Out of scope items: correctly omitted
+
+```
+**REQUIREMENTS COMPLIANCE:**
+- [ ] Requirement 1: [PASS/FAIL] - [evidence with file:line]
+- [ ] Requirement 2: [PASS/FAIL] - [evidence with file:line]
+...
+```
+
+**BLOCKER**: If any requirement from spec.md is NOT met:
+- DO NOT proceed to commits
+- Report gaps with specific remediation steps
+- Return to /implement to address gaps
+</requirements_compliance_check>
+
+Only after BOTH gates pass, gather review context:
 
 1. **Load plan**: Read `.beads/artifacts/$BEAD_ID/plan.md`
 2. **Get changes**: `git diff --stat` and `git diff --name-only`
@@ -87,21 +125,28 @@ Write findings to `.beads/artifacts/$BEAD_ID/review.md`:
 ---
 date: [ISO timestamp]
 bead: $BEAD_ID
-reviewer: ai-automated
+reviewer: ai-coach (adversarial)
+verdict: [APPROVED / NOT_APPROVED]
 ---
 
-## Implementation Review
+## Coach Review
+
+### Requirements Compliance (from spec.md)
+| Requirement | Status | Evidence |
+|-------------|--------|----------|
+| [Req 1] | ✅ PASS | `file.ts:45` |
+| [Req 2] | ✅ PASS | `handler.ts:23` |
+
+### Automated Verification
+- [x] Build passes
+- [x] Tests pass (X total, Y new)
+- [x] Lint clean (or N warnings)
 
 ### Status by Phase
 | Phase | Status | Notes |
 |-------|--------|-------|
 | Phase 1 | Complete | Matches plan |
 | Phase 2 | Complete | Minor deviation (see below) |
-
-### Automated Verification
-- [x] Build passes
-- [x] Tests pass (X total, Y new)
-- [x] Lint clean (or N warnings)
 
 ### Files Changed
 | File | Changes | Planned? |
@@ -122,8 +167,12 @@ reviewer: ai-automated
 ### Manual Testing Required
 - [ ] [Items from plan's manual verification section]
 
-### Recommendations
-- [Any follow-up items or tech debt noted]
+### Coach Verdict
+🎯 **APPROVED** - All requirements from spec.md verified. Implementation meets the requirements contract.
+
+(or)
+
+⚠️ **NOT APPROVED** - [X] gaps identified. Return to /implement.
 ```
 </review_artifact>
 </phase>
@@ -236,10 +285,12 @@ For child beads, also show sibling status and guide to next phase.
 
 <constraints>
 - Never push without showing what will be pushed
-- Never close bead without confirming work is complete
-- Always create review.md artifact
+- Never close bead without COACH APPROVAL (requirements compliance verified)
+- Always create review.md artifact with coach verdict
 - Reference bead ID in all commits
 - **HARD BLOCKER**: If tests fail, STOP - do not commit, do not close bead
 - **HARD BLOCKER**: If lint fails, STOP - do not commit, do not close bead
+- **HARD BLOCKER**: If ANY requirement from spec.md is not met, STOP - return to /implement
 - **HIERARCHY RULE**: Parent bead cannot close until ALL children are closed
+- **ADVERSARIAL PRINCIPLE**: Do not trust self-reports of completion. Verify independently against spec.md.
 </constraints>

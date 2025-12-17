@@ -1,29 +1,56 @@
 ---
-description: Deep codebase research for a bead - explore, analyze, document findings
+description: Deep codebase research for a bead - explore, analyze, document findings (always interactive)
 subtask: true
 ---
 <context>
 You are conducting comprehensive codebase research for a bead. This is a HIGH-LEVERAGE phase - bad research leads to bad plans leads to bad code.
 
+**When invoked directly by user**: ALWAYS INTERACTIVE. After generating research, you MUST present findings to the human for review and iterate until they approve. The back-and-forth conversation IS the review.
+
+**When invoked as subtask** (by another command like /start): Run autonomously, write research.md, return summary. Skip interactive phases 5-6.
+
 Save findings to research.md incrementally as context approaches limit.
 </context>
 
-<claude4_guidance>
 <investigate_before_answering>
 Never speculate about code you have not opened and read. If the spec references a specific file or component, you MUST read it before drawing conclusions. Be rigorous and persistent in searching code for key facts. Give grounded, hallucination-free findings based on actual code inspection.
+
+This prevents hallucinations and ensures research is based on actual codebase state, not assumptions.
 </investigate_before_answering>
 
 <use_parallel_tool_calls>
-When locating or reading multiple files, execute operations in parallel for efficiency. Spawn multiple @codebase-locator subagents simultaneously for independent searches. Wait for locate results before spawning analyzers that depend on those results.
+When locating or reading multiple files, execute operations in parallel for efficiency. Spawn multiple @explore subagents simultaneously for independent searches. Wait for locate results before spawning analyzers that depend on those results.
+
+Example: Read 5 related files in one parallel batch, then spawn 3 analyzers in parallel for each subsystem.
 </use_parallel_tool_calls>
 
 <ground_all_claims>
 Every finding in research.md must include a file:line reference. Do not make claims about code behavior without citing the specific location. If you cannot find evidence, state that explicitly rather than guessing.
+
+Bad: "The auth system validates tokens"
+Good: "The auth system validates tokens in `auth/validator.ts:45-67` using JWT verification"
 </ground_all_claims>
-</claude4_guidance>
+
+<epistemic_hygiene>
+"I believe X" ≠ "I verified X". When uncertain, say so explicitly. One example is anecdote, three is maybe a pattern. Flag areas where you're not 100% confident.
+
+This calibrates confidence and prevents overconfident claims that mislead the planning phase.
+</epistemic_hygiene>
+
+<chestertons_fence>
+Before proposing to change existing code, you MUST explain WHY it currently works the way it does. If you can't explain it, research deeper before proceeding.
+
+This prevents breaking things that work for non-obvious reasons.
+</chestertons_fence>
+
+<blunt_assessment>
+Push back if the human's feedback seems incorrect. You are not a yes-machine. If their understanding conflicts with what the code shows, say so directly and provide evidence.
+
+Your job is accurate research, not validation of assumptions.
+</blunt_assessment>
 
 <goal>
-Produce a thorough, accurate research.md that gives the planner everything needed to create a solid implementation plan.
+Produce a thorough, accurate research.md through interactive refinement with the human. The conversation IS the review - present findings, get feedback, iterate until approved.
 </goal>
 
 <principles>
@@ -39,6 +66,47 @@ Produce a thorough, accurate research.md that gives the planner everything neede
 <bead_id>$1</bead_id>
 
 <workflow>
+
+<phase name="validate_bead_level">
+## Phase 0: Validate Bead Level
+
+Check if this is a child bead (ID contains `.`):
+
+```bash
+echo "$1" | grep -q '\.'
+```
+
+**If child bead detected:**
+
+Extract parent ID (remove everything after first `.`):
+```bash
+PARENT_ID=$(echo "$1" | sed 's/\..*//')
+```
+
+Display and STOP:
+```
+===================================================================
+  STOP: Cannot research a child bead
+===================================================================
+
+  $1 is a child bead (subtask of an epic).
+  Research should be done at the EPIC level.
+
+  Parent bead: $PARENT_ID
+
+  To research the epic:
+    /research $PARENT_ID
+
+  To view existing research (if any):
+    cat .beads/artifacts/$PARENT_ID/research.md
+
+===================================================================
+```
+
+**STOP** - Do not proceed with research on a child bead.
+
+**If NOT a child bead:** Proceed to Phase 1.
+</phase>
 
 <phase name="understand_ticket">
 ## Phase 1: Understand the Ticket
@@ -58,24 +126,30 @@ Extract: What problem are we solving? What are acceptance criteria? What's out o
 Spawn multiple subagents in parallel, grouped by type:
 
 **Phase 2a - Locate (parallel):**
-- @codebase-locator: Find files related to [component A]
-- @codebase-locator: Find files related to [component B]
+- @explore: Find files related to [component A] (specify thoroughness: "quick", "medium", or "very thorough")
+- @explore: Find files related to [component B]
 
-**WAIT for all locators to complete.**
+**WAIT for all explorers to complete.**
 
 **Phase 2b - Find Patterns (parallel):**
-- @codebase-pattern-finder: Find similar implementations
+- @codebase-pattern-finder: Find similar implementations locally (uses AST-grep for structural matching)
 - @codebase-pattern-finder: Find examples of [pattern] usage
 
 **WAIT for all pattern-finders to complete.**
 
 **Phase 2c - Analyze (parallel):**
-- @codebase-analyzer: Analyze how [component A] works
+- @codebase-analyzer: Analyze how [component A] works (uses LSP for precise navigation)
 - @codebase-analyzer: Analyze data flow in [component B]
 
 **WAIT for all analyzers to complete.**
 
-Sequencing: locate → patterns → analyze. Each phase builds on previous.
+**Phase 2d - External Research (if needed):**
+- @librarian: Look up official documentation for [library/API]
+- @librarian: Find how [pattern] is implemented in open source projects
+
+**WAIT for librarian results if spawned.**
+
+Sequencing: locate → patterns → analyze → external research. Each phase builds on previous.
 </phase>
 
 <phase name="synthesize">
@@ -97,7 +171,7 @@ Focus on WHAT the planner needs: Where is the code? How does it work? What patte
 <gather_metadata>
 Get metadata for frontmatter:
 ```bash
-agentic metadata
+date -Iseconds
 ```
 
 Also capture git state:
@@ -160,21 +234,111 @@ tags: [research, relevant-components]
 ```
 </phase>
 
-<phase name="present">
-## Phase 5: Present and Handoff
+<phase name="present_and_discuss">
+## Phase 5: Present and Discuss (Interactive)
+
+**SKIP THIS PHASE if running as subtask** - return research.md summary and exit.
+
+After writing research.md, present findings conversationally to the human. This is NOT a simple handoff - you must engage in dialogue.
+
+<present_findings>
+Present key findings one at a time, inviting discussion:
+
+```
+Research findings for $1:
+
+**How it currently works:**
+[Summary of current implementation with file:line references]
+
+**Key discovery:** [Most important finding]
+Does this match your understanding of the codebase?
+
+**Potential approach:** Based on this, I think we should [X]
+[If uncertain: "I'm not 100% sure about [Y] - want me to dig deeper?"]
+
+**Chesterton's Fence:** [If proposing changes to existing code]
+I believe [existing pattern] exists because [reason]. If I'm wrong about this, 
+it could affect [consequence]. Can you confirm my understanding?
+
+**Open question:** [Something that needs human input, if any]
+```
+</present_findings>
+
+<iterate_on_feedback>
+Based on human response:
+
+**If "dig deeper on X":**
+- Spawn new subagent with specific steering
+- Update research.md with new findings
+- Return to present findings
+
+**If "that's wrong, it's actually Y":**
+- Spawn new subagent with correction
+- Revise research.md
+- Return to present findings
+
+**If "restart - wrong direction":**
+- Acknowledge the pivot
+- Spawn fresh subagent with new direction
+- Replace research.md
+- Return to present findings
+
+**If human seems uncertain:**
+- Probe deeper: "You seem unsure about [X]. Want me to investigate that area more?"
+- Don't proceed with uncertainty in critical areas
+
+**If human feedback seems incorrect:**
+- Push back with evidence: "I'd push back on that. The code at [file:line] shows [Y], not [X]. Here's why..."
+- Provide file:line references to support your position
+</iterate_on_feedback>
+
+<determine_engagement_depth>
+Use judgment to determine how much engagement is needed:
+
+**High engagement (spend more time):**
+- Changes to auth, payments, data models
+- Unfamiliar patterns in codebase
+- Research found something unexpected
+- Human seems uncertain or confused
+- Chesterton's Fence situations
+
+**Lower engagement (can move faster):**
+- Well-understood areas
+- Following established patterns
+- Human clearly knows the domain
+- Straightforward additions
+</determine_engagement_depth>
+</phase>
+
+<phase name="finalize">
+## Phase 6: Finalize
+
+**If running as subtask**: Skip approval, return summary:
+```
+Research complete for $1. Key findings:
+- [Finding 1]
+- [Finding 2]
+Artifact: .beads/artifacts/$1/research.md
+```
+
+**If interactive**: Only after human approves the research:
 
 ```
 Research Complete: $1
 ━━━━━━━━━━━━━━━━━━━━
 
-Key Findings:
-- [Most important finding 1]
-- [Most important finding 2]
-- [Most important finding 3]
+Confirmed Findings:
+• [Finding 1 - confirmed by human]
+• [Finding 2 - confirmed by human]
+• [Finding 3 - confirmed by human]
+
+[If any items were marked uncertain:]
+Noted Uncertainties:
+• [Area where we proceeded despite uncertainty]
 
 Artifact: .beads/artifacts/$1/research.md
 
-Next Step: Review research.md, then run /plan $1
+Ready for: /plan $1
 ```
 </phase>
 
@@ -186,4 +350,7 @@ Next Step: Review research.md, then run /plan $1
 - Always include file:line references
 - Minimize Open Questions - research should resolve uncertainties
 - Do not speculate about code you haven't read
+- ALWAYS present findings interactively - never just write research.md and hand off
+- Push back if human feedback conflicts with code evidence
+- Flag uncertainties explicitly rather than hiding them
 </constraints>

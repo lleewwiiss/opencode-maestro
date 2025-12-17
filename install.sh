@@ -2,10 +2,7 @@
 
 set -e
 
-# Configuration
-GITHUB_USER="lleewwiiss" # Change this to your username if forking
-GITHUB_REPO="opencode-maestro"
-BRANCH="main"
+REPO_URL="https://raw.githubusercontent.com/lleewwiiss/opencode-maestro/main"
 
 # Parse Arguments
 TARGET_DIR=".opencode"
@@ -43,7 +40,7 @@ mkdir -p "$TARGET_DIR/command"
 # 3. Install Templates
 echo "📥 Downloading configuration..."
 
-BASE_URL="https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/templates"
+BASE_URL="${REPO_URL}/templates"
 
 # Helper to download or copy
 install_file() {
@@ -61,14 +58,12 @@ install_file() {
     fi
 }
 
-# Install Agents
+# Install Agents (codebase-specific only - oh-my-opencode provides explore, librarian, oracle, etc.)
 install_file ".opencode/agent/codebase-analyzer.md" "$TARGET_DIR/agent/codebase-analyzer.md"
-install_file ".opencode/agent/codebase-locator.md" "$TARGET_DIR/agent/codebase-locator.md"
 install_file ".opencode/agent/codebase-pattern-finder.md" "$TARGET_DIR/agent/codebase-pattern-finder.md"
-install_file ".opencode/agent/web-search-researcher.md" "$TARGET_DIR/agent/web-search-researcher.md"
 
-# Install Commands
-COMMANDS="create.md start.md research.md plan.md iterate.md implement.md finish.md handoff.md resume.md"
+# Install Commands (11 commands in the workflow)
+COMMANDS="coach.md create.md start.md research.md plan.md iterate.md implement.md finish.md handoff.md rehydrate.md scout.md"
 for cmd in $COMMANDS; do
     install_file ".opencode/command/$cmd" "$TARGET_DIR/command/$cmd"
 done
@@ -86,7 +81,7 @@ if [ -f "./AGENTIC_WORKFLOW.md" ] && [ "$INSTALL_TYPE" == "Local" ]; then
 elif [ -f "./AGENTIC_WORKFLOW.md" ]; then
     cp "./AGENTIC_WORKFLOW.md" "$WORKFLOW_DEST"
 else
-    curl -sSL "https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/AGENTIC_WORKFLOW.md" -o "$WORKFLOW_DEST"
+    curl -sSL "${REPO_URL}/AGENTIC_WORKFLOW.md" -o "$WORKFLOW_DEST"
 fi
 
 echo "✅ Installation Complete!"

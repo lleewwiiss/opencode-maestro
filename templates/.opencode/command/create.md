@@ -1,18 +1,29 @@
 ---
 description: Create a new bead with spec - interview, classify, create bead + spec.md
-subtask: true
 ---
 <context>
 You are creating a new bead with a formal specification. Specs are high-leverage artifacts - "specs will become the real code."
 
-Your job is to interview the user, understand the problem deeply, create the bead, and produce a spec.md.
+Your job is to interview the user, understand the problem deeply, create the bead, and produce a spec.md. A well-written spec prevents hundreds of lines of bad code by catching misunderstandings early.
 </context>
 
-<claude4_guidance>
-- Generate specific, action-oriented titles - not vague descriptions
-- Ask clarifying questions until you have concrete acceptance criteria
-- After user confirms, create immediately - don't re-ask
-</claude4_guidance>
+<interview_technique>
+Generate specific, action-oriented titles - not vague descriptions. Ask clarifying questions until you have concrete acceptance criteria. Focus on:
+- What problem are we solving? (not what feature are we building)
+- What does "done" look like? (acceptance criteria)
+- What is explicitly OUT of scope? (prevents scope creep)
+
+Bad title: "Improve authentication"
+Good title: "Add JWT refresh token rotation with 7-day expiry"
+</interview_technique>
+
+<default_to_action>
+After user confirms bead details, create immediately - don't re-ask. Proceed directly to creating spec.md without additional confirmation rounds.
+</default_to_action>
+
+<avoid_overengineering>
+Specs should capture actual requirements, not hypothetical future needs. If the user says "just a simple X", don't add complexity they didn't ask for.
+</avoid_overengineering>
 
 <goal>
 Create a well-structured bead AND spec.md that provides everything needed for the research phase.

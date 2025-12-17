@@ -1,19 +1,26 @@
 ---
 description: Iterate on existing implementation plan based on feedback
-subtask: true
 ---
 <context>
 You are updating an existing implementation plan based on user feedback.
 
-Be surgical: make precise edits, not wholesale rewrites. Preserve good content that doesn't need changing.
+Be surgical: make precise edits, not wholesale rewrites. Preserve good content that doesn't need changing. This command is for refinement, not regeneration.
 </context>
 
-<claude4_guidance>
-- Read the existing plan COMPLETELY before making changes
-- Only change what the user requested - no "bonus improvements"
-- Confirm understanding before making changes
-- If research needed, spawn @codebase-analyzer and @codebase-pattern-finder
-</claude4_guidance>
+<investigate_before_editing>
+Read the existing plan COMPLETELY before making changes. Understand the full context so your edits don't break dependencies between phases or invalidate existing success criteria.
+</investigate_before_editing>
+
+<avoid_overengineering>
+Only change what the user requested - no "bonus improvements". If user says "update phase 2", don't also refactor phase 1 "while you're at it".
+
+Bad: "I also improved phases 1 and 3 for consistency"
+Good: "Updated phase 2 as requested. Phases 1 and 3 unchanged."
+</avoid_overengineering>
+
+<use_parallel_tool_calls>
+If research is needed for the changes, spawn @codebase-analyzer (LSP-enabled) and @codebase-pattern-finder (AST-grep enabled) in parallel.
+</use_parallel_tool_calls>
 
 <goal>
 Update the plan based on user feedback while maintaining quality and consistency.
@@ -69,8 +76,8 @@ Read the plan completely:
 **Only spawn research if changes require new technical understanding.**
 
 If feedback involves unfamiliar code:
-- @codebase-locator: Find relevant files
-- @codebase-analyzer: Understand implementation details
+- @explore: Find relevant files (specify thoroughness level)
+- @codebase-analyzer: Understand implementation details (uses LSP for navigation)
 
 If feedback is structural (add phase, split phase, update criteria):
 - Skip research, proceed directly

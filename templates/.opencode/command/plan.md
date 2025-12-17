@@ -1,31 +1,65 @@
 ---
-description: Create implementation plan from research - detailed, actionable, reviewable
-subtask: true
+description: Create implementation plan from research - detailed, actionable, reviewable (always interactive)
 ---
 <context>
 You are creating an implementation plan for a bead. This is a HIGH-LEVERAGE phase - a bad plan leads to hundreds of bad lines of code.
 
-The human will review this plan before implementation. Make it detailed enough to execute but clear enough to review.
+This command is ALWAYS INTERACTIVE. You must engage in dialogue with the human:
+1. Present approach options and get confirmation
+2. Walk through phases with depth based on risk/complexity (your judgment)
+3. Iterate on feedback until approved
+4. Only create child beads AFTER plan is finalized
+
+The back-and-forth conversation IS the review. Do not just generate plan.md and hand off.
 
 Save progress to plan.md incrementally as context approaches limit.
 </context>
 
-<claude4_guidance>
 <investigate_before_planning>
 Read research.md and key source files COMPLETELY before proposing design options. Do not speculate about code structure or patterns you have not verified. If research references specific files, read them to understand current implementation.
+
+This ensures plans are grounded in actual codebase state, not assumptions about how code might work.
 </investigate_before_planning>
 
 <use_parallel_tool_calls>
 When gathering context, read multiple files in parallel. Spawn @codebase-analyzer and @codebase-pattern-finder in parallel for independent analyses. Wait for results before synthesizing into design options.
+
+Example: Read research.md, spec.md, and 3 key implementation files in one parallel batch.
 </use_parallel_tool_calls>
 
 <avoid_overengineering>
 Plans should specify the minimum changes needed to solve the problem. Do not plan for hypothetical future requirements. Do not add abstractions or flexibility that wasn't requested.
+
+Bad: "Add a plugin system for future extensibility"
+Good: "Add the specific handler needed for this feature"
 </avoid_overengineering>
-</claude4_guidance>
+
+<epistemic_hygiene>
+"I believe X" ≠ "I verified X". When uncertain about an approach, say so explicitly. Flag areas where you're not 100% confident.
+
+This prevents overconfident plans that fail during implementation.
+</epistemic_hygiene>
+
+<chestertons_fence>
+Before proposing to change existing code patterns, explain WHY they currently exist. If you can't explain it, don't propose changing it without flagging the uncertainty.
+
+This prevents breaking working patterns for unknown reasons.
+</chestertons_fence>
+
+<blunt_assessment>
+Push back if the human's feedback seems incorrect or would lead to a worse design. You are not a yes-machine. Provide evidence for your position.
+
+Your job is a good plan, not agreement with bad ideas.
+</blunt_assessment>
+
+<autonomy_check>
+Before significant design decisions: Am I the right entity to decide this? If uncertain AND consequential, ask the human first. Cheap to ask, expensive to guess wrong.
+
+Examples of "ask first": Database schema changes, API contract changes, authentication approaches.
+</autonomy_check>
 
 <goal>
-Produce a thorough plan.md that an implementer can follow step-by-step, with clear success criteria and no open questions.
+Produce a thorough plan.md through interactive refinement with the human. The conversation IS the review - present approach, walk through phases, iterate until approved, then create child beads.
 </goal>
 
 <principles>
@@ -49,6 +83,50 @@ Produce a thorough plan.md that an implementer can follow step-by-step, with cle
 
 <workflow>
 
+<phase name="validate_bead_level">
+## Phase 0: Validate Bead Level
+
+Check if this is a child bead (ID contains `.`):
+
+```bash
+echo "$1" | grep -q '\.'
+```
+
+**If child bead detected:**
+
+Extract parent ID (remove everything after first `.`):
+```bash
+PARENT_ID=$(echo "$1" | sed 's/\..*//')
+```
+
+Display and STOP:
+```
+===================================================================
+  STOP: Cannot plan a child bead
+===================================================================
+
+  $1 is a child bead (subtask of an epic).
+  Planning should be done at the EPIC level.
+
+  Parent bead: $PARENT_ID
+
+  To plan the epic:
+    /plan $PARENT_ID
+
+  To view existing plan:
+    cat .beads/artifacts/$PARENT_ID/plan.md
+
+  To implement this child's phase:
+    /implement $1
+
+===================================================================
+```
+
+**STOP** - Do not proceed with planning on a child bead.
+
+**If NOT a child bead:** Proceed to Phase 1.
+</phase>
+
 <phase name="gather_context">
 ## Phase 1: Gather Context
 
@@ -60,10 +138,13 @@ Read completely before planning:
 4. **Key files** identified in research (read them fully)
 
 If research identified areas needing deeper understanding, spawn parallel analyzers:
-- @codebase-analyzer: Understand [specific component] implementation details
-- @codebase-pattern-finder: Find examples of [pattern] we should follow
+- @codebase-analyzer: Understand [specific component] implementation details (uses LSP for navigation)
+- @codebase-pattern-finder: Find examples of [pattern] we should follow (uses AST-grep for structural search)
+- @librarian: Look up official docs or open source examples if needed
 
 WAIT for all to complete before proceeding.
+
+For complex architectural decisions, consider consulting @oracle for design review and tradeoff analysis.
 </phase>
 
 <phase name="design_options">
@@ -114,6 +195,10 @@ Proposed Plan Structure
 1. [Phase name] - [what it accomplishes]
 2. [Phase name] - [what it accomplishes]
 3. [Phase name] - [what it accomplishes]
+
+Risk Assessment: [Your judgment on overall risk level]
+[If high-risk: "This touches [critical area] - I'll walk through each phase carefully"]
+[If low-risk: "This is fairly contained - I can move faster through the details"]
 
 Does this phasing make sense?
 ```
@@ -221,60 +306,170 @@ npm run lint
 ```
 </phase>
 
-<phase name="child_beads">
-## Phase 5: Create Child Beads (Optional)
+<phase name="walk_through_phases">
+## Phase 5: Walk Through Phases (Interactive)
 
-Check bead type:
-```bash
-bd show $1 --json
+After writing plan.md, walk through each phase with the human. Use judgment to determine depth:
+
+<determine_engagement_depth>
+**High engagement (spend more time, detailed walkthrough):**
+- Changes to auth, payments, data models
+- Unfamiliar patterns in codebase
+- Chesterton's Fence situations (changing existing behavior)
+- Human seems uncertain
+
+**Lower engagement (can summarize and move faster):**
+- Adding tests
+- UI tweaks
+- Following well-established patterns
+- Human clearly knows the domain
+</determine_engagement_depth>
+
+<high_risk_phase_walkthrough>
+**For high-risk/complex phases:**
+
 ```
+Phase [N]: [Phase Name]
+───────────────────────
 
-**For Epics or plans with 3+ phases**: Offer to create child beads:
+This phase touches [critical area]. Let me walk through it carefully.
+
+**What we're changing:**
+[Detailed breakdown of changes]
+
+**Specifically, I'll be changing:**
+- `[file:line]` which currently does [X]
+- The new behavior will [Y]
+
+**Chesterton's Fence check:**
+[If applicable: "I believe [existing pattern] exists because [reason]. 
+If I'm wrong, [consequence]. Can you confirm?"]
+
+**Risk:** [What could go wrong]
+
+Any concerns with this phase?
+```
+</high_risk_phase_walkthrough>
+
+<low_risk_phase_walkthrough>
+**For low-risk/simple phases:**
 
 ```
-Plan has [N] phases. Create child beads for atomic tracking?
+Phases [N-M] are straightforward - [brief summary of what they do].
+I'll move faster through these unless you want details on any specific one.
 
-Child beads would be:
-  $1.1 - Phase 1: [name]
-  $1.2 - Phase 2: [name]
-  $1.3 - Phase 3: [name]
+Quick summary:
+- Phase N: [one-liner]
+- Phase M: [one-liner]
 
-Create child beads? (yes / no)
+Any of these need more detail?
 ```
+</low_risk_phase_walkthrough>
 
-If user approves:
-```bash
-bd create "[Phase 1 name]" --type task --parent $1 --priority [same as parent]
-bd create "[Phase 2 name]" --type task --parent $1 --priority [same as parent]
-bd create "[Phase 3 name]" --type task --parent $1 --priority [same as parent]
-```
+<iterate_on_feedback>
+Based on human response:
 
-Update plan.md with child bead mapping.
+**If feedback on a phase:**
+- Spawn subagent to revise that section
+- Cascade changes to dependent phases if needed
+- Update plan.md
+- Return to present revised phase
+
+**If questions:**
+- Discuss thoroughly
+- Revise if needed
+
+**If human feedback seems incorrect:**
+- Push back with evidence: "I'd caution against [X] because [file:line shows Y]..."
+- Provide rationale for the current plan
+- But ultimately defer to human if they insist (note the override in plan.md)
+</iterate_on_feedback>
 </phase>
 
-<phase name="review_handoff">
-## Phase 6: Review and Handoff
+<phase name="finalize_and_create_beads">
+## Phase 6: Finalize and Create Child Beads
 
-Present for review:
+Only after human approves the complete plan:
 
 ```
-Plan Created: $1
+Plan Approved: $1
 ━━━━━━━━━━━━━━━━
 
-Summary: [1-2 sentence summary]
+Summary of changes during review:
+• [Change 1 made based on feedback]
+• [Change 2 made based on feedback]
+• (or "No changes - plan approved as generated")
 
-Phases:
-1. [Phase 1 name]
-2. [Phase 2 name]
-3. [Phase 3 name]
+[If any overrides noted:]
+Human Overrides (noted in plan):
+• [Decision where human overrode agent recommendation]
+```
 
+<create_child_beads>
+**For plans with 2+ phases**, create child beads with RICH descriptions:
+
+```
+Creating child beads with detailed descriptions...
+
+$1.1 - [Phase 1 name]
+$1.2 - [Phase 2 name]
+$1.3 - [Phase 3 name]
+```
+
+For each child bead, include a description that enables standalone execution:
+
+```bash
+bd create "[Phase 1 name]" --type task --parent $1 --priority [same as parent] --description "$(cat <<'EOF'
+## Context
+[1-2 sentences: What this phase accomplishes in the larger feature]
+
+## Key Changes
+- `[file1.ts]` - [what changes]
+- `[file2.ts]` - [what changes]
+
+## Patterns to Follow
+- See `[similar_file:line]` for [pattern]
+- Use [approach] from research
+
+## Success Criteria
+- [ ] [Specific criterion]
+- [ ] Tests pass: [specific tests]
+
+## References
+- Full plan: `.beads/artifacts/$1/plan.md`
+- Research: `.beads/artifacts/$1/research.md`
+EOF
+)"
+```
+
+The description should contain enough context that an agent could work from the bead itself, with plan.md as backup reference.
+</create_child_beads>
+
+Update plan.md with child bead mapping:
+
+```markdown
+## Child Beads
+| Phase | Bead ID | Status |
+|-------|---------|--------|
+| Phase 1: [name] | $1.1 | open |
+| Phase 2: [name] | $1.2 | open |
+| Phase 3: [name] | $1.3 | open |
+```
+
+<final_handoff>
+```
+Plan Finalized: $1
+━━━━━━━━━━━━━━━━━━
+
+Phases: [N]
+Child Beads: [list if created]
 Estimated Effort: [time]
 
 Artifact: .beads/artifacts/$1/plan.md
 
-Please review. When approved:
-  /implement $1
+Ready for: /implement $1.1  (or /implement $1 if no children)
 ```
+</final_handoff>
 </phase>
 
 </workflow>
@@ -287,4 +482,8 @@ Please review. When approved:
 - Include explicit "What We're NOT Doing" section
 - Every phase must have testable success criteria
 - Testing Strategy section must specify new tests to write
+- ALWAYS walk through phases interactively - never just write plan.md and hand off
+- Push back if human feedback would lead to worse design
+- Create child beads ONLY after plan is finalized and approved
+- Child bead descriptions must be rich enough for standalone execution
 </constraints>

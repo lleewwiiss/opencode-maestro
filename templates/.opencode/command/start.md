@@ -4,12 +4,20 @@ description: Start work on a bead - find/create bead, setup workspace, load cont
 <context>
 You are starting a focused work session. Your job is to get the developer working on the right bead with full context.
 
-If no bead ID is provided, help find or create one.
+If no bead ID is provided, help find or create one. This command orchestrates workspace setup and context loading before diving into research or implementation.
 </context>
 
 <goal>
 Get the developer from "I want to work" to "ready for research" with minimal friction.
 </goal>
+
+<use_parallel_tool_calls>
+Run independent operations in parallel: check git status, run bd commands, and read artifacts simultaneously. Fire background exploration agents immediately without waiting for results.
+</use_parallel_tool_calls>
+
+<default_to_action>
+Once bead is identified and workspace is ready, proceed directly to loading context. Don't ask for confirmation at each step - flow through phases smoothly.
+</default_to_action>
 
 <bead_id>$1</bead_id>
 <flags>$ARGUMENTS</flags>
@@ -76,7 +84,7 @@ git checkout -b $BEAD_ID
 </phase>
 
 <phase name="load_context">
-## Phase 3: Load Context
+## Phase 3: Load Context (Async Pre-warm)
 
 Check for existing artifacts:
 ```bash
@@ -85,9 +93,19 @@ ls -la .beads/artifacts/$BEAD_ID/ 2>/dev/null
 
 Read any that exist: spec.md, research.md, plan.md
 
-If spec mentions specific components, use subagents in parallel:
-- @codebase-locator: Find relevant files
-- @codebase-pattern-finder: Find similar implementations
+**Fire background agents immediately (don't wait):**
+If spec mentions specific components:
+```
+background_task(agent="explore", prompt="Find files related to [component from spec] in this codebase. Return file paths and brief descriptions.")
+background_task(agent="explore", prompt="Find files related to [other component] in this codebase.")
+```
+
+If spec mentions unfamiliar libraries:
+```
+background_task(agent="librarian", prompt="Look up [library] documentation and common usage patterns.")
+```
+
+**Continue immediately to briefing** - don't wait for background agents.
 
 Present briefing:
 ```
@@ -103,16 +121,25 @@ Artifacts:
   plan.md:     [exists/missing]
 
 Spec Summary: [Key points]
+
+[Background agents running - results will be available for next phase]
 ```
 </phase>
 
 <phase name="next_action">
 ## Phase 4: Guide Next Action
 
+**Collect background results** (if any were fired in Phase 3):
+```
+background_output(task_id="...") // for each task
+```
+
+Include any useful findings in your guidance.
+
 Based on artifact state:
 
 **NO spec.md:** Run /create to create one properly
-**NO research.md:** Run /research $BEAD_ID
+**NO research.md:** Run /research $BEAD_ID (background exploration results will seed the research)
 **research.md EXISTS, NO plan.md:** Run /plan $BEAD_ID
 **plan.md EXISTS:** Run /implement $BEAD_ID
 </phase>
