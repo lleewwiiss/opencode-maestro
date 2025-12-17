@@ -477,6 +477,12 @@ bd compact --apply --id bd-xxx --summary summary.txt
 
 Artifacts are **local-only working files** - never committed to git. The `/start` command auto-adds `.beads/artifacts/` to `.gitignore`.
 
+**Why local-only?**
+- Artifacts contain session-specific working state (research notes, draft plans, handoffs)
+- They become stale quickly and would clutter git history
+- Different developers may have different artifacts for the same bead
+- The PR description and git history are the permanent record; artifacts are ephemeral
+
 ```
 .beads/
 └── artifacts/           # ← In .gitignore, never committed
