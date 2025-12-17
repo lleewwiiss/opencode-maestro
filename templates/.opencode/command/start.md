@@ -12,7 +12,7 @@ Get the developer from "I want to work" to "ready for research" with minimal fri
 </goal>
 
 <use_parallel_tool_calls>
-Run independent operations in parallel: check git status, run bd commands, and read artifacts simultaneously. Fire background exploration agents immediately without waiting for results.
+Run independent operations in parallel: check git status, run bd commands, and read artifacts simultaneously. Fire multiple background exploration agents in parallel, then wait for all to complete before presenting briefing.
 </use_parallel_tool_calls>
 
 <default_to_action>
@@ -89,7 +89,7 @@ git checkout -b $BEAD_ID
 </phase>
 
 <phase name="load_context">
-## Phase 3: Load Context (Async Pre-warm)
+## Phase 3: Load Context & Explore
 
 Check for existing artifacts:
 ```bash
@@ -98,7 +98,8 @@ ls -la .beads/artifacts/$BEAD_ID/ 2>/dev/null
 
 Read any that exist: spec.md, research.md, plan.md
 
-**Fire background agents immediately (don't wait):**
+**Fire background exploration agents (parallel):**
+
 If spec mentions specific components:
 ```
 background_task(agent="explore", prompt="Find files related to [component from spec] in this codebase. Return file paths and brief descriptions.")
@@ -110,9 +111,38 @@ If spec mentions unfamiliar libraries:
 background_task(agent="librarian", prompt="Look up [library] documentation and common usage patterns.")
 ```
 
-**Continue immediately to briefing** - don't wait for background agents.
+**Wait for all background agents to complete:**
+```
+background_output(task_id="...") // for each task - blocks until complete
+```
 
-Present briefing:
+**Write exploration context artifact** (for /research to consume):
+
+If background agents returned useful findings, write to `.beads/artifacts/$BEAD_ID/exploration-context.md`:
+
+```markdown
+---
+date: [ISO timestamp]
+git_commit: [current HEAD]
+source: /start exploration
+---
+
+## Component Locations
+[File paths and descriptions from explore agents]
+
+## External References
+[Documentation and patterns from librarian agents]
+
+## Areas Needing Deeper Research
+[Components found but not fully analyzed]
+```
+</phase>
+
+<phase name="next_action">
+## Phase 4: Briefing & Next Action
+
+Present complete briefing (exploration already done):
+
 ```
 Bead: $BEAD_ID
 ━━━━━━━━━━━━━━
@@ -121,32 +151,33 @@ Title: [from bd show]
 Type/Priority: [from bd show]
 
 Artifacts:
-  spec.md:     [exists/missing]
-  research.md: [exists/missing]
-  plan.md:     [exists/missing]
+  spec.md:              [exists/missing]
+  exploration-context:  [exists/missing]
+  research.md:          [exists/missing]
+  plan.md:              [exists/missing]
 
 Spec Summary: [Key points]
 
-[Background agents running - results will be available for next phase]
-```
-</phase>
-
-<phase name="next_action">
-## Phase 4: Guide Next Action
-
-**Collect background results** (if any were fired in Phase 3):
-```
-background_output(task_id="...") // for each task
+Exploration Findings:
+  [Summary of what background agents discovered]
+  [Key files located]
+  [External docs found]
 ```
 
-Include any useful findings in your guidance.
+Based on artifact state, guide to next command:
 
-Based on artifact state:
+**NO spec.md:** 
+  → Run `/create` to define the problem first
 
-**NO spec.md:** Run /create to create one properly
-**NO research.md:** Run /research $BEAD_ID (background exploration results will seed the research)
-**research.md EXISTS, NO plan.md:** Run /plan $BEAD_ID
-**plan.md EXISTS:** Run /implement $BEAD_ID
+**NO research.md:** 
+  → Run `/research $BEAD_ID`
+  → (exploration-context.md will seed the research - no duplicate exploration)
+
+**research.md EXISTS, NO plan.md:** 
+  → Run `/plan $BEAD_ID`
+
+**plan.md EXISTS:** 
+  → Run `/implement $BEAD_ID`
 </phase>
 
 </workflow>

@@ -115,15 +115,44 @@ Read these files completely before spawning any subagents:
 
 1. Bead metadata: `bd show $1 --json`
 2. Spec (if exists): `.beads/artifacts/$1/spec.md`
-3. Any linked tickets or parent beads
+3. **Exploration context (if exists)**: `.beads/artifacts/$1/exploration-context.md`
+4. Any linked tickets or parent beads
 
 Extract: What problem are we solving? What are acceptance criteria? What's out of scope?
+
+**If exploration-context.md exists:**
+- Components have already been located by `/start`
+- External docs have already been fetched
+- Check git_commit in frontmatter - if different from current HEAD, context may be stale
+- Use this as starting point for Phase 2 (skip redundant locate/librarian work)
 </phase>
 
 <phase name="parallel_exploration">
 ## Phase 2: Parallel Exploration
 
-Spawn multiple subagents in parallel, grouped by type:
+**If exploration-context.md EXISTS (from /start):**
+
+Skip Phase 2a (Locate) and Phase 2d (External Research) - already done.
+Go directly to deeper analysis:
+
+**Phase 2b - Find Patterns (parallel):**
+- @codebase-pattern-finder: Find similar implementations locally (uses AST-grep for structural matching)
+- @codebase-pattern-finder: Find examples of [pattern] usage
+
+**WAIT for all pattern-finders to complete.**
+
+**Phase 2c - Analyze (parallel):**
+- @codebase-analyzer: Analyze how [component A] works (uses LSP for precise navigation)
+- @codebase-analyzer: Analyze data flow in [component B]
+- Focus on components identified in exploration-context.md
+
+**WAIT for all analyzers to complete.**
+
+---
+
+**If NO exploration-context.md (direct /research invocation):**
+
+Run full exploration sequence:
 
 **Phase 2a - Locate (parallel):**
 - @explore: Find files related to [component A] (specify thoroughness: "quick", "medium", or "very thorough")
@@ -148,6 +177,8 @@ Spawn multiple subagents in parallel, grouped by type:
 - @librarian: Find how [pattern] is implemented in open source projects
 
 **WAIT for librarian results if spawned.**
+
+---
 
 Sequencing: locate → patterns → analyze → external research. Each phase builds on previous.
 </phase>
