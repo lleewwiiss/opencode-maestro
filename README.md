@@ -61,7 +61,6 @@ graph TD
     subgraph "2. Research & Plan"
         Research["/research"]:::agent
         Plan["/plan"]:::agent
-        Iterate["/iterate"]:::agent
     end
 
     subgraph "3. Implement"
@@ -83,8 +82,6 @@ graph TD
     Scout -.-> Research
     Start --> Research
     Research --> Plan
-    Plan --> Iterate
-    Iterate --> Plan
     Plan --> Implement
     Implement --> Coach
     Coach --> Implement
@@ -94,7 +91,7 @@ graph TD
     Resume -.-> Implement
 ```
 
-## The 11-Command Workflow
+## The 10-Command Workflow
 
 ```
 /create                   →  Interview → bead + spec.md (uses templates)
@@ -107,9 +104,7 @@ graph TD
       │                       (back-and-forth conversation IS the review)
       ↓
 /plan <bead-id>           →  INTERACTIVE: Generate → walk through phases → iterate → plan.md
-      │                       (child beads created ONLY after approval)
-      ↓
-/iterate <bead-id>        →  Update plan based on feedback (optional)
+      │                       (iterate IN the conversation until approved, child beads created after)
       ↓
 /implement <bead-id>      →  Execute plan with coach checkpoints (max 10 turns/phase)
       │                       ↓
@@ -236,8 +231,7 @@ We evaluated Claude Code Skills (model-invoked SKILL.md files) but chose OpenCod
 | `/start [bead-id]` | Find/setup bead, load context |
 | `/scout <target>` | Quick async exploration (fire-and-forget) |
 | `/research <bead-id>` | **Interactive:** explore → present → iterate → research.md |
-| `/plan <bead-id>` | **Interactive:** generate → walk through → iterate → plan.md + child beads |
-| `/iterate <bead-id>` | Update existing plan based on feedback |
+| `/plan <bead-id>` | **Interactive:** generate → walk through → iterate until approved → plan.md + child beads |
 | `/implement <bead-id>` | Execute plan with coach checkpoints |
 | `/coach <bead-id>` | Adversarial validation against spec.md |
 | `/finish [bead-id]` | Coach review → commit + sync + push |

@@ -38,7 +38,7 @@ The workflow implements a **Coach-Player** adversarial cooperation pattern:
 
 ---
 
-## The 11-Command Workflow
+## The 10-Command Workflow
 
 ```
 /create                   →  Interview → bead + spec.md (uses templates)
@@ -51,9 +51,7 @@ The workflow implements a **Coach-Player** adversarial cooperation pattern:
       │                       (back-and-forth conversation IS the review)
       ↓
 /plan <bead-id>           →  INTERACTIVE: Generate → walk through phases → iterate → plan.md
-      │                       (child beads created ONLY after approval)
-      ↓
-/iterate <bead-id>        →  Update plan based on feedback (optional)
+      │                       (iterate IN the conversation until approved, child beads created after)
       ↓
 /implement <bead-id>      →  Execute plan with coach checkpoints (max 10 turns/phase)
       │                       ↓
@@ -263,8 +261,7 @@ See `/implement` command for full coding standards.
 | `/start [bead-id]` | Main | bd ready → find/setup bead, load context |
 | `/scout <target>` | Main | Quick async exploration (fire-and-forget) |
 | `/research <bead-id>` | Subtask | **Interactive:** explore → present → iterate → research.md |
-| `/plan <bead-id>` | Subtask | **Interactive:** generate → walk through → iterate → plan.md + child beads |
-| `/iterate <bead-id>` | Subtask | Update existing plan based on feedback |
+| `/plan <bead-id>` | Subtask | **Interactive:** generate → walk through → iterate until approved → plan.md + child beads |
 | `/implement <bead-id>` | Subtask | Execute plan with coach checkpoints |
 | `/coach <bead-id>` | Subtask | Adversarial validation against spec.md |
 | `/finish [bead-id]` | Subtask | Coach review → commit + close bead |
@@ -279,8 +276,9 @@ For simple tasks without subtasks:
 /create                   # Interview -> bead + spec.md
 /start bd-xxx             # Setup workspace
 /research bd-xxx          # INTERACTIVE: explore -> discuss -> iterate -> research.md
-/plan bd-xxx              # INTERACTIVE: generate -> walk through -> iterate -> plan.md
-/iterate bd-xxx           # Update plan if needed (optional)
+                          # (back-and-forth until you approve -> research.md)
+/plan bd-xxx              # INTERACTIVE: Plan ONCE, walk through all phases
+                          # (iterate in conversation until approved, child beads created after)
 /implement bd-xxx         # Execute all phases
 /finish bd-xxx            # Commit -> PR
 ```
@@ -342,7 +340,6 @@ For features with multiple phases. **Research and planning happen ONCE at the ep
 | `/start` | Loaded context | Understand state before research |
 | `/research` | **Interactive dialogue** | Bad research = bad plan = bad code. Conversation IS review. |
 | `/plan` | **Interactive dialogue** | Approve approach AND phases. Child beads created after approval. |
-| `/iterate` | Updated `plan.md` | Verify changes are correct |
 | `/rehydrate` | Restored context | Confirm state before continuing |
 | `/finish` | Commits + PR | Final validation |
 
@@ -543,10 +540,11 @@ Artifacts in `.beads/artifacts/<bead-id>/` are **working files**, not permanent 
 |---------|---------|-----|
 | `/create` | Subtask | Focused interview |
 | `/start` | Main | User interaction needed |
+| `/scout` | Main | Quick async exploration |
 | `/research` | Subtask | Deep exploration, fresh context |
 | `/plan` | Subtask | Focused planning |
-| `/iterate` | Subtask | Surgical plan updates |
 | `/implement` | Subtask | Clean context for coding |
+| `/coach` | Subtask | Adversarial validation |
 | `/finish` | Subtask | Independent review |
 | `/handoff` | Subtask | Capture state before context limit |
 | `/rehydrate` | Subtask | Restore state in fresh context |

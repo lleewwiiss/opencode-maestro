@@ -63,7 +63,7 @@ install_file ".opencode/agent/codebase-analyzer.md" "$TARGET_DIR/agent/codebase-
 install_file ".opencode/agent/codebase-pattern-finder.md" "$TARGET_DIR/agent/codebase-pattern-finder.md"
 
 # Install Commands (11 commands in the workflow)
-COMMANDS="coach.md create.md start.md research.md plan.md iterate.md implement.md finish.md handoff.md rehydrate.md scout.md"
+COMMANDS="coach.md create.md start.md research.md plan.md implement.md finish.md handoff.md rehydrate.md scout.md"
 for cmd in $COMMANDS; do
     install_file ".opencode/command/$cmd" "$TARGET_DIR/command/$cmd"
 done
