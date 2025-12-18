@@ -96,7 +96,7 @@ graph TD
 ```
 /create                   →  Interview → bead + spec.md (uses templates)
       ↓
-/start [bead-id]          →  bd ready → setup workspace → load context (async pre-warm)
+/start [bead-id]          →  bd ready → setup workspace → explore → exploration-context.md
       ↓
 /scout <target>           →  Quick async exploration (fire-and-forget, optional)
       ↓
@@ -293,10 +293,11 @@ Artifacts are **local-only working files** - never committed to git. The `/start
 .beads/
 └── artifacts/           # ← In .gitignore, never committed
     └── <bead-id>/
-        ├── spec.md       # Created by /create
-        ├── research.md   # Created by /research
-        ├── plan.md       # Created by /plan
-        ├── review.md     # Created by /finish
-        └── handoffs/     # Session continuity
+        ├── spec.md                # Created by /create
+        ├── exploration-context.md # Created by /start (seeds /research)
+        ├── research.md            # Created by /research
+        ├── plan.md                # Created by /plan
+        ├── review.md              # Created by /finish
+        └── handoffs/              # Session continuity
             └── YYYY-MM-DD_HH-MM-SS_handoff.md
 ```
